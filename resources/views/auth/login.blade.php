@@ -1,18 +1,18 @@
 <x-layouts.auth :title="__('Login')">
     <div class="max-w-md w-full space-y-8">
         <div class="text-center">
-            <h2 class="mt-6 text-3xl font-extrabold text-gray-900">
+            <h2 class="mt-6 text-3xl font-extrabold text-gray-900 dark:text-gray-100">
                 {{ __('Sign in to your account') }}
             </h2>
-            <p class="mt-2 text-sm text-gray-600">
+            <p class="mt-2 text-sm text-gray-600 dark:text-gray-400">
                 Choose your preferred login method
             </p>
         </div>
 
         <!-- Session Status -->
         @if (session('status'))
-            <div class="rounded-md bg-green-50 p-4">
-                <div class="text-sm text-green-700">
+            <div class="rounded-md bg-success-50 p-4">
+                <div class="text-sm text-success-700">
                     {{ session('status') }}
                 </div>
             </div>
@@ -20,8 +20,8 @@
 
         <!-- Error Messages -->
         @if ($errors->any())
-            <div class="rounded-md bg-red-50 p-4">
-                <div class="text-sm text-red-700">
+            <div class="rounded-md bg-error-50 p-4">
+                <div class="text-sm text-error-700">
                     <div class="font-medium">{{ __('Whoops! Something went wrong.') }}</div>
                     <ul class="mt-2 list-disc list-inside">
                         @foreach ($errors->all() as $error)
@@ -34,8 +34,8 @@
 
         <!-- Success Messages -->
         @if (session('success'))
-            <div class="rounded-md bg-green-50 p-4">
-                <div class="text-sm text-green-700">
+            <div class="rounded-md bg-success-50 p-4">
+                <div class="text-sm text-success-700">
                     {{ session('success') }}
                 </div>
             </div>
@@ -43,8 +43,8 @@
 
         <!-- Info Messages -->
         @if (session('message'))
-            <div class="rounded-md bg-blue-50 p-4">
-                <div class="text-sm text-blue-700">
+            <div class="rounded-md bg-info-50 p-4">
+                <div class="text-sm text-info-700">
                     {{ session('message') }}
                 </div>
             </div>
@@ -52,10 +52,11 @@
 
         <!-- Authentication Method Selector -->
         <div>
-            <label for="auth_type" class="block text-sm font-medium text-gray-700">
+            <label for="auth_type" class="block text-sm font-medium text-gray-700 dark:text-gray-300">
                 {{ __('Authentication Method') }}
             </label>
-            <select id="auth_type" name="auth_type" class="mt-1 block w-full pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm rounded-md">                <option value="email_password">Email + Password</option>
+            <select id="auth_type" name="auth_type" class="form-input">
+                <option value="email_password">Email + Password</option>
                 <option value="phone_password">Phone + Password</option>
                 <option value="email_otp">Email + OTP</option>
                 <option value="phone_otp">Phone + OTP</option>
@@ -66,12 +67,12 @@
 
         <!-- Magic Link Section -->
         <div class="hidden" id="magic_link_section">
-            <div class="p-4 bg-gradient-to-r from-indigo-50 to-purple-50 border border-indigo-200 rounded-lg">
+            <div class="p-4 bg-gradient-to-r from-primary-50 to-info-50 border border-primary-200 rounded-lg">
                 <div class="flex items-center mb-3">
-                    <x-icon name="mail" class="w-5 h-5 text-indigo-600 mr-2" />
-                    <h3 class="text-lg font-medium text-indigo-900">✨ Magic Link Login</h3>
+                    <x-icon name="mail" class="w-5 h-5 text-primary-600 mr-2" />
+                    <h3 class="text-lg font-medium text-primary-900">✨ Magic Link Login</h3>
                 </div>
-                <p class="text-indigo-700 text-sm mb-4">
+                <p class="text-primary-700 text-sm mb-4">
                     Enter your email and we'll send you a secure magic link to sign in instantly without a password.
                 </p>
                 
@@ -84,18 +85,18 @@
                         label="Email Address"
                         placeholder="Enter your email address"
                         :value="old('magic_email')"
-                        class="border-indigo-300 focus:border-indigo-500 focus:ring-indigo-500"
+                        class="border-primary-300 focus:border-primary-500 focus:ring-primary-500"
                     />
                 </div>
                 
                 <!-- Send Magic Link Button -->
-                <x-button id="send_magic_link_btn" class="w-full bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700">
+                <x-button id="send_magic_link_btn" class="w-full bg-gradient-to-r from-primary-600 to-info-600 hover:from-primary-700 hover:to-info-700">
                     <x-icon name="lock-closed" class="w-4 h-4 mr-2" />
                     Send Magic Link
                 </x-button>
                 
                 <!-- Magic Link Info -->
-                <div class="mt-3 text-xs text-indigo-600">
+                <div class="mt-3 text-xs text-primary-600">
                     <p>• The magic link will expire in 15 minutes</p>
                     <p>• Check your email inbox and spam folder</p>
                     <p>• Click the link to sign in automatically</p>
@@ -113,7 +114,7 @@
                         <path fill="currentColor" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/>
                         <path fill="currentColor" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/>
                     </svg>
-                    <h3 class="text-lg font-medium text-red-900">🚀 Google Sign-In</h3>
+                    <h3 class="text-lg font-medium text-red-900">Google Sign-In</h3>
                 </div>
                 <p class="text-red-700 text-sm mb-4">
                     Sign in quickly and securely with your Google account. No need to remember another password!
@@ -151,6 +152,7 @@
                     name="identifier"
                     type="email"
                     label="Email"
+                    placeholder="Enter your email address"
                     :value="old('identifier')"
                     required
                     autofocus
@@ -164,6 +166,7 @@
                     name="password"
                     type="password"
                     label="Password"
+                    placeholder="Enter your password"
                 />
             </div>
 
@@ -176,6 +179,7 @@
                             name="otp"
                             type="text"
                             label="OTP Code"
+                            placeholder="Enter 6-digit OTP code"
                             maxlength="6"
                         />
                     </div>
@@ -198,7 +202,7 @@
 
             <div class="flex items-center justify-between">
                 @if (Route::has('password.request'))
-                    <a class="text-sm text-indigo-600 hover:text-indigo-500" href="{{ route('password.request') }}">
+                    <a class="text-sm text-primary-600 hover:text-primary-500 dark:text-primary-400 dark:hover:text-primary-300" href="{{ route('password.request') }}">
                         {{ __('Forgot your password?') }}
                     </a>
                 @endif
@@ -209,9 +213,9 @@
             </div>
 
             <div class="text-center">
-                <p class="text-sm text-gray-600">
+                <p class="text-sm text-gray-600 dark:text-gray-400">
                     Don't have an account? 
-                    <a href="{{ route('auth.register') }}" class="text-indigo-600 hover:text-indigo-500">Register here</a>
+                    <a href="{{ route('auth.register') }}" class="text-primary-600 hover:text-primary-500 dark:text-primary-400 dark:hover:text-primary-300">Register here</a>
                 </p>
             </div>
         </form>        <script>
@@ -337,13 +341,13 @@
                             messageDiv.className = 'otp-message mt-2 p-3 rounded text-sm';
                             
                             if (result.ok && result.data.message) {
-                                messageDiv.className += ' bg-green-100 border border-green-400 text-green-700';
+                                messageDiv.className += ' alert alert-success';
                                 messageDiv.textContent = result.data.message;
                             } else if (!result.ok && result.data.error) {
-                                messageDiv.className += ' bg-red-100 border border-red-400 text-red-700';
+                                messageDiv.className += ' alert alert-error';
                                 messageDiv.textContent = result.data.error;
                             } else {
-                                messageDiv.className += ' bg-red-100 border border-red-400 text-red-700';
+                                messageDiv.className += ' alert alert-error';
                                 messageDiv.textContent = 'Failed to send OTP';
                             }
                             
@@ -356,7 +360,7 @@
                             console.error('Network Error:', error);
                             
                             const messageDiv = document.createElement('div');
-                            messageDiv.className = 'otp-message mt-2 p-3 rounded text-sm bg-red-100 border border-red-400 text-red-700';
+                            messageDiv.className = 'otp-message mt-2 p-3 rounded text-sm alert alert-error';
                             messageDiv.textContent = 'Network error while sending OTP. Please check your connection and try again.';
                             
                             const otpSectionElement = document.getElementById('otp_section');
@@ -430,7 +434,7 @@
                             messageDiv.className = 'magic-link-message mt-3 p-3 rounded text-sm';
                             
                             if (result.ok && result.data.message) {
-                                messageDiv.className += ' bg-green-100 border border-green-400 text-green-700';
+                                messageDiv.className += ' alert alert-success';
                                 messageDiv.innerHTML = `
                                     <div class="flex items-center">
                                         <svg class="w-4 h-4 mr-2" fill="currentColor" viewBox="0 0 20 20">
@@ -440,7 +444,7 @@
                                     </div>
                                 `;
                             } else if (!result.ok && result.data.error) {
-                                messageDiv.className += ' bg-red-100 border border-red-400 text-red-700';
+                                messageDiv.className += ' alert alert-error';
                                 messageDiv.innerHTML = `
                                     <div class="flex items-center">
                                         <svg class="w-4 h-4 mr-2" fill="currentColor" viewBox="0 0 20 20">
@@ -450,7 +454,7 @@
                                     </div>
                                 `;
                             } else {
-                                messageDiv.className += ' bg-red-100 border border-red-400 text-red-700';
+                                messageDiv.className += ' alert alert-error';
                                 messageDiv.innerHTML = 'Failed to send magic link';
                             }
                             
@@ -463,7 +467,7 @@
                             console.error('Network Error:', error);
                             
                             const messageDiv = document.createElement('div');
-                            messageDiv.className = 'magic-link-message mt-3 p-3 rounded text-sm bg-red-100 border border-red-400 text-red-700';
+                            messageDiv.className = 'magic-link-message mt-3 p-3 rounded text-sm alert alert-error';
                             messageDiv.innerHTML = 'Network error while sending magic link. Please check your connection and try again.';
                             
                             const magicLinkSectionElement = document.getElementById('magic_link_section');

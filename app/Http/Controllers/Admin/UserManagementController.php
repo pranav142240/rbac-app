@@ -52,6 +52,21 @@ class UserManagementController extends Controller
             });
         }
 
+        // Filter by status
+        if ($request->filled('status')) {
+            switch ($request->status) {
+                case 'verified':
+                    $query->whereNotNull('email_verified_at');
+                    break;
+                case 'unverified':
+                    $query->whereNull('email_verified_at');
+                    break;
+                case 'phone_verified':
+                    $query->whereNotNull('phone_verified_at');
+                    break;
+            }
+        }
+
         $users = $query->paginate(15)->withQueryString();
 
         $roles = Role::all();

@@ -43,6 +43,10 @@ Route::middleware('auth')->group(function () {
     // Multi-Auth Profile Management
     Route::get('auth/profile', [MultiAuthController::class, 'profile'])->name('auth.profile');
     Route::post('auth/add-method', [MultiAuthController::class, 'addAuthMethod'])->name('auth.add-method');
+    Route::post('auth/verify-method/{methodId}', [MultiAuthController::class, 'verifyAuthMethod'])->name('auth.verify-method');
+    Route::delete('auth/remove-method/{methodId}', [MultiAuthController::class, 'removeAuthMethod'])->name('auth.remove-method');
+    Route::patch('auth/set-primary-method', [MultiAuthController::class, 'setPrimaryAuthMethod'])->name('auth.set-primary-method');
+    Route::patch('auth/update-profile', [MultiAuthController::class, 'updateProfile'])->name('auth.update-profile');
     Route::post('auth/logout', [MultiAuthController::class, 'logout'])->name('auth.logout');
 
     // Original Breeze routes

@@ -231,11 +231,16 @@ class MultiAuthController extends Controller
     /**
      * Show user profile
      */
-    public function profile()    {
+    public function profile()
+    {
         $user = Auth::user();
+        $user->load(['authMethods', 'roles', 'organizations', 'organizationGroups.organization']);
+        
         $authMethods = $user->authMethods;
+        $roles = $user->roles->pluck('name');
+        $permissions = $user->getAllPermissions();
 
-        return view('auth.profile', compact('user', 'authMethods'));
+        return view('auth.profile', compact('user', 'authMethods', 'roles', 'permissions'));
     }    /**
      * Add new auth method
      */
@@ -399,6 +404,151 @@ class MultiAuthController extends Controller
             }
             
             return redirect()->route('auth.login')->withErrors(['error' => 'Google authentication failed. Please try again.']);
+        }
+    }
+
+    /**
+     * Verify an authentication method
+     */
+    public function verifyAuthMethod(Request $request, $methodId)
+    {
+        try {
+            $user = Auth::user();
+            $authMethod = $user->authMethods()->findOrFail($methodId);
+            
+            // Check if method is already verified
+            if ($authMethod->isVerified()) {
+                return response()->json(['message' => 'Authentication method is already verified'], 200);
+            }
+
+            // Send verification OTP/Email based on method type
+            if (str_contains($authMethod->auth_method_type, 'email')) {
+                $result = $this->authService->sendOTP($authMethod->identifier, 'email');
+            } elseif (str_contains($authMethod->auth_method_type, 'phone')) {
+                $result = $this->authService->sendOTP($authMethod->identifier, 'phone');
+            } else {
+                // For SSO methods, mark as verified immediately
+                $authMethod->markAsVerified();
+                return response()->json(['message' => 'Authentication method verified successfully']);
+            }
+
+            if ($result['success']) {
+                return response()->json(['message' => $result['message']]);
+            }
+
+            return response()->json(['error' => $result['message']], 400);
+
+        } catch (\Exception $e) {
+            return response()->json(['error' => 'Failed to send verification: ' . $e->getMessage()], 500);
+        }
+    }
+
+    /**
+     * Remove an authentication method
+     */
+    public function removeAuthMethod($methodId)
+    {
+        try {
+            $user = Auth::user();
+            $authMethod = $user->authMethods()->findOrFail($methodId);
+            
+            // Prevent removal if it's the only auth method
+            if ($user->authMethods()->count() <= 1) {
+                return response()->json(['error' => 'Cannot remove the only authentication method'], 400);
+            }
+
+            // If removing the primary method, set another as primary
+            if ($user->primary_auth_method === $authMethod->auth_method_type) {
+                $nextMethod = $user->authMethods()->where('id', '!=', $methodId)->first();
+                if ($nextMethod) {
+                    $user->update(['primary_auth_method' => $nextMethod->auth_method_type]);
+                }
+            }
+
+            $authMethod->delete();
+
+            return response()->json(['message' => 'Authentication method removed successfully']);
+
+        } catch (\Exception $e) {
+            return response()->json(['error' => 'Failed to remove authentication method: ' . $e->getMessage()], 500);
+        }
+    }
+
+    /**
+     * Set primary authentication method
+     */
+    public function setPrimaryAuthMethod(Request $request)
+    {
+        $validator = Validator::make($request->all(), [
+            'auth_method_type' => 'required|string',
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json(['errors' => $validator->errors()], 422);
+        }
+
+        try {
+            $user = Auth::user();
+            
+            // Check if user has this auth method
+            $authMethod = $user->authMethods()->where('auth_method_type', $request->auth_method_type)->first();
+            
+            if (!$authMethod) {
+                return response()->json(['error' => 'Authentication method not found'], 404);
+            }
+
+            // Check if method is verified
+            if (!$authMethod->isVerified()) {
+                return response()->json(['error' => 'Authentication method must be verified before setting as primary'], 400);
+            }
+
+            $user->update(['primary_auth_method' => $request->auth_method_type]);
+
+            return response()->json(['message' => 'Primary authentication method updated successfully']);
+
+        } catch (\Exception $e) {
+            return response()->json(['error' => 'Failed to update primary authentication method: ' . $e->getMessage()], 500);
+        }
+    }
+
+    /**
+     * Update profile information
+     */
+    public function updateProfile(Request $request)
+    {
+        $validator = Validator::make($request->all(), [
+            'name' => 'required|string|max:255',
+            'primary_auth_method' => 'required|string',
+        ]);
+
+        if ($validator->fails()) {
+            return back()->withErrors($validator)->withInput();
+        }
+
+        try {
+            $user = Auth::user();
+            
+            // Check if user has the selected primary auth method
+            $authMethod = $user->authMethods()->where('auth_method_type', $request->primary_auth_method)->first();
+            
+            if (!$authMethod) {
+                return back()->withErrors(['primary_auth_method' => 'Selected authentication method not found'])->withInput();
+            }
+
+            // Check if method is verified
+            if (!$authMethod->isVerified()) {
+                return back()->withErrors(['primary_auth_method' => 'Authentication method must be verified before setting as primary'])->withInput();
+            }
+
+            $user->update([
+                'name' => $request->name,
+                'primary_auth_method' => $request->primary_auth_method,
+            ]);
+
+            return back()->with('success', 'Profile updated successfully');
+
+        } catch (\Exception $e) {
+            return back()->withErrors(['error' => 'Failed to update profile: ' . $e->getMessage()])->withInput();
         }
     }
 }

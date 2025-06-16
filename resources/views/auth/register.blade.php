@@ -1,18 +1,18 @@
 <x-layouts.auth :title="__('Register')">
     <div class="max-w-md w-full space-y-8">
         <div class="text-center">
-            <h2 class="mt-6 text-3xl font-extrabold text-gray-900">
+            <h2 class="mt-6 text-3xl font-extrabold text-gray-900 dark:text-gray-100">
                 {{ __('Create your account') }}
             </h2>
-            <p class="mt-2 text-sm text-gray-600">
+            <p class="mt-2 text-sm text-gray-600 dark:text-gray-400">
                 Register with your preferred authentication method
             </p>
         </div>
 
         <!-- Error Messages -->
         @if ($errors->any())
-            <div class="rounded-md bg-red-50 p-4">
-                <div class="text-sm text-red-700">
+            <div class="rounded-md bg-error-50 p-4">
+                <div class="text-sm text-error-700">
                     <div class="font-medium">{{ __('Please fix the following errors:') }}</div>
                     <ul class="mt-2 list-disc list-inside">
                         @foreach ($errors->all() as $error)
@@ -25,8 +25,8 @@
 
         <!-- Success Messages -->
         @if (session('success'))
-            <div class="rounded-md bg-green-50 p-4">
-                <div class="text-sm text-green-700">
+            <div class="rounded-md bg-success-50 p-4">
+                <div class="text-sm text-success-700">
                     {{ session('success') }}
                 </div>
             </div>
@@ -34,8 +34,8 @@
 
         <!-- Info Messages -->
         @if (session('message'))
-            <div class="rounded-md bg-blue-50 p-4">
-                <div class="text-sm text-blue-700">
+            <div class="rounded-md bg-info-50 p-4">
+                <div class="text-sm text-info-700">
                     {{ session('message') }}
                 </div>
             </div>
@@ -50,7 +50,7 @@
                     <path fill="currentColor" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/>
                     <path fill="currentColor" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/>
                 </svg>
-                <h3 class="text-lg font-medium text-red-900">🚀 Quick Sign-Up with Google</h3>
+                <h3 class="text-lg font-medium text-red-900">Quick Sign-Up with Google</h3>
             </div>
             <p class="text-red-700 text-sm mb-4">
                 Sign up instantly with your Google account. Fast, secure, and no forms to fill!
@@ -84,10 +84,10 @@
 
             <!-- Authentication Method Selector -->
             <div>
-                <label for="auth_method_type" class="block text-sm font-medium text-gray-700">
+                <label for="auth_method_type" class="block text-sm font-medium text-gray-700 dark:text-gray-300">
                     {{ __('Primary Authentication Method') }}
                 </label>
-                <select id="auth_method_type" name="auth_method_type" class="mt-1 block w-full pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm rounded-md" required>
+                <select id="auth_method_type" name="auth_method_type" class="form-input" required>
                     <option value="">Select authentication method</option>
                     <option value="email_password" {{ old('auth_method_type') == 'email_password' ? 'selected' : '' }}>Email + Password</option>
                     <option value="phone_password" {{ old('auth_method_type') == 'phone_password' ? 'selected' : '' }}>Phone + Password</option>
@@ -95,9 +95,9 @@
                     <option value="phone_otp" {{ old('auth_method_type') == 'phone_otp' ? 'selected' : '' }}>Phone + OTP (Passwordless)</option>
                 </select>
                 @error('auth_method_type')
-                    <p class="mt-2 text-sm text-red-600">{{ $message }}</p>
+                    <p class="mt-2 text-sm text-error-600">{{ $message }}</p>
                 @enderror
-                <p class="text-xs text-gray-500 mt-1">You can add additional authentication methods later from your profile</p>
+                <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">You can add additional authentication methods later from your profile</p>
             </div>
 
             <!-- Name -->
@@ -107,6 +107,7 @@
                     name="name"
                     type="text"
                     label="Full Name"
+                    placeholder="Enter your full name"
                     :value="old('name')"
                     required
                     autofocus
@@ -120,6 +121,7 @@
                     name="email"
                     type="email"
                     label="Email Address"
+                    placeholder="Enter your email address"
                     :value="old('email')"
                 />
             </div>
@@ -131,7 +133,7 @@
                     name="phone"
                     type="tel"
                     label="Phone Number"
-                    placeholder="+1234567890"
+                    placeholder="Enter your phone number (e.g., +1234567890)"
                     :value="old('phone')"
                 />
             </div>
@@ -144,6 +146,7 @@
                         name="password"
                         type="password"
                         label="Password"
+                        placeholder="Enter a strong password"
                     />
                 </div>
 
@@ -153,13 +156,14 @@
                         name="password_confirmation"
                         type="password"
                         label="Confirm Password"
+                        placeholder="Re-enter your password"
                     />
                 </div>
             </div>
 
             <!-- Info for OTP methods -->
-            <div class="hidden bg-blue-50 p-3 rounded-md" id="otp_info">
-                <p class="text-sm text-blue-800">
+            <div class="hidden bg-info-50 p-3 rounded-md" id="otp_info">
+                <p class="text-sm text-info-800">
                     <strong>Passwordless Authentication:</strong> You'll receive an OTP code each time you log in. No password required!
                 </p>
             </div>

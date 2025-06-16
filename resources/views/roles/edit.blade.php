@@ -20,19 +20,18 @@
                         <!-- Role Name -->
                         <div>
                             <label for="name" class="block text-sm font-medium text-gray-700 dark:text-gray-300">
-                                {{ __('Role Name') }} <span class="text-red-500">*</span>
-                            </label>
-                            <input 
-                                type="text" 
-                                name="name" 
-                                id="name" 
+                                {{ __('Role Name') }} <span class="text-error-500">*</span>
+                            </label>                            <input
+                                type="text"
+                                name="name"
+                                id="name"
                                 value="{{ old('name', $role->name) }}"
-                                class="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-indigo-500 dark:focus:border-indigo-600 focus:ring-indigo-500 dark:focus:ring-indigo-600 shadow-sm"
+                                class="form-input"
                                 placeholder="Enter role name"
                                 required
                             >
                             @error('name')
-                                <p class="mt-2 text-sm text-red-600 dark:text-red-400">{{ $message }}</p>
+                                <p class="mt-2 text-sm text-error-600 dark:text-error-400">{{ $message }}</p>
                             @enderror
                         </div>
 
@@ -40,17 +39,16 @@
                         <div>
                             <label for="guard_name" class="block text-sm font-medium text-gray-700 dark:text-gray-300">
                                 {{ __('Guard Name') }}
-                            </label>
-                            <select 
-                                name="guard_name" 
+                            </label>                            <select
+                                name="guard_name"
                                 id="guard_name"
-                                class="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-indigo-500 dark:focus:border-indigo-600 focus:ring-indigo-500 dark:focus:ring-indigo-600 shadow-sm"
+                                class="form-input"
                             >
                                 <option value="web" {{ old('guard_name', $role->guard_name) == 'web' ? 'selected' : '' }}>Web</option>
                                 <option value="api" {{ old('guard_name', $role->guard_name) == 'api' ? 'selected' : '' }}>API</option>
                             </select>
                             @error('guard_name')
-                                <p class="mt-2 text-sm text-red-600 dark:text-red-400">{{ $message }}</p>
+                                <p class="mt-2 text-sm text-error-600 dark:text-error-400">{{ $message }}</p>
                             @enderror
                         </div>
 
@@ -67,7 +65,7 @@
                                             name="permissions[]" 
                                             value="{{ $permission->id }}" 
                                             id="permission_{{ $permission->id }}"
-                                            class="h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300 rounded"
+                                            class="h-4 w-4 text-primary-600 focus:ring-primary-500 border-gray-300 rounded"
                                             {{ 
                                                 (is_array(old('permissions')) && in_array($permission->id, old('permissions'))) || 
                                                 (!old('permissions') && in_array($permission->id, $rolePermissions)) 
@@ -90,7 +88,7 @@
                                 @endif
                             </div>
                             @error('permissions')
-                                <p class="mt-2 text-sm text-red-600 dark:text-red-400">{{ $message }}</p>
+                                <p class="mt-2 text-sm text-error-600 dark:text-error-400">{{ $message }}</p>
                             @enderror
                         </div>
 
@@ -99,14 +97,14 @@
                             <button 
                                 type="button" 
                                 onclick="selectAllPermissions()" 
-                                class="text-sm text-indigo-600 hover:text-indigo-800 dark:text-indigo-400 dark:hover:text-indigo-300"
+                                class="text-sm text-primary-600 hover:text-primary-800 dark:text-primary-400 dark:hover:text-primary-300"
                             >
                                 {{ __('Select All') }}
                             </button>
                             <button 
                                 type="button" 
                                 onclick="deselectAllPermissions()" 
-                                class="text-sm text-indigo-600 hover:text-indigo-800 dark:text-indigo-400 dark:hover:text-indigo-300"
+                                class="text-sm text-primary-600 hover:text-primary-800 dark:text-primary-400 dark:hover:text-primary-300"
                             >
                                 {{ __('Deselect All') }}
                             </button>
@@ -117,7 +115,7 @@
                             <a href="{{ route('roles.index') }}" class="bg-gray-300 hover:bg-gray-400 text-gray-800 font-bold py-2 px-4 rounded">
                                 {{ __('Cancel') }}
                             </a>
-                            <button type="submit" class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded">
+                            <button type="submit" class="btn btn-primary">
                                 {{ __('Update Role') }}
                             </button>
                         </div>                </form>

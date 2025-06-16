@@ -17,19 +17,18 @@
                         <!-- Role Name -->
                         <div>
                             <label for="name" class="block text-sm font-medium text-gray-700 dark:text-gray-300">
-                                {{ __('Role Name') }} <span class="text-red-500">*</span>
-                            </label>
-                            <input 
-                                type="text" 
-                                name="name" 
-                                id="name" 
+                                {{ __('Role Name') }} <span class="text-error-500">*</span>
+                            </label>                            <input
+                                type="text"
+                                name="name"
+                                id="name"
                                 value="{{ old('name') }}"
-                                class="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-indigo-500 dark:focus:border-indigo-600 focus:ring-indigo-500 dark:focus:ring-indigo-600 shadow-sm"
+                                class="form-input"
                                 placeholder="Enter role name"
                                 required
                             >
                             @error('name')
-                                <p class="mt-2 text-sm text-red-600 dark:text-red-400">{{ $message }}</p>
+                                <p class="mt-2 text-sm text-error-600 dark:text-error-400">{{ $message }}</p>
                             @enderror
                         </div>
 
@@ -37,17 +36,16 @@
                         <div>
                             <label for="guard_name" class="block text-sm font-medium text-gray-700 dark:text-gray-300">
                                 {{ __('Guard Name') }}
-                            </label>
-                            <select 
-                                name="guard_name" 
+                            </label>                            <select
+                                name="guard_name"
                                 id="guard_name"
-                                class="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-indigo-500 dark:focus:border-indigo-600 focus:ring-indigo-500 dark:focus:ring-indigo-600 shadow-sm"
+                                class="form-input"
                             >
                                 <option value="web" {{ old('guard_name', 'web') == 'web' ? 'selected' : '' }}>Web</option>
                                 <option value="api" {{ old('guard_name') == 'api' ? 'selected' : '' }}>API</option>
                             </select>
                             @error('guard_name')
-                                <p class="mt-2 text-sm text-red-600 dark:text-red-400">{{ $message }}</p>
+                                <p class="mt-2 text-sm text-error-600 dark:text-error-400">{{ $message }}</p>
                             @enderror
                         </div>
 
@@ -110,7 +108,7 @@
                             <a href="{{ route('roles.index') }}" class="bg-gray-300 hover:bg-gray-400 text-gray-800 font-bold py-2 px-4 rounded">
                                 {{ __('Cancel') }}
                             </a>
-                            <button type="submit" class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded">
+                            <button type="submit" class="btn btn-primary">
                                 {{ __('Create Role') }}
                             </button>
                         </div>                </form>

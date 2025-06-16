@@ -1,39 +1,37 @@
-<x-app-layout>
-    <x-slot name="header">
+<x-layouts.app>
+    <div class="mb-6">
         <div class="flex justify-between items-center">
             <div>
-                <h2 class="font-semibold text-xl text-gray-800 dark:text-gray-200 leading-tight">
+                <h1 class="text-3xl font-bold text-gray-900 dark:text-gray-100">
                     {{ $organization->name }} - Groups
-                </h2>
-                <p class="text-sm text-gray-600 dark:text-gray-400">
+                </h1>
+                <p class="text-gray-600 dark:text-gray-400 mt-2">
                     Manage organization groups
                 </p>
             </div>
             <div class="flex space-x-2">
                 @can('update', $organization)
                     <a href="{{ route('organizations.groups.create', $organization) }}" 
-                       class="bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded">
+                       class="btn btn-success">
+                        <svg class="h-4 w-4 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
+                        </svg>
                         Create Group
                     </a>
                 @endcan
                 <a href="{{ route('organizations.show', $organization) }}" 
-                   class="bg-gray-500 hover:bg-gray-700 text-white font-bold py-2 px-4 rounded">
+                   class="btn btn-secondary">
+                    <svg class="h-4 w-4 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+                    </svg>
                     Back to Organization
                 </a>
             </div>
         </div>
-    </x-slot>
+    </div>
 
-    <div class="py-12">
-        <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
-            @if(session('success'))
-                <div class="mb-4 bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded">
-                    {{ session('success') }}
-                </div>
-            @endif
-
-            <div class="bg-white dark:bg-gray-800 overflow-hidden shadow-sm sm:rounded-lg">
-                <div class="p-6 text-gray-900 dark:text-gray-100">
+    <div class="bg-white dark:bg-gray-800 overflow-hidden shadow-sm rounded-lg border border-gray-200 dark:border-gray-700">
+        <div class="p-6 text-gray-900 dark:text-gray-100">
                     @if($groups->count() > 0)
                         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                             @foreach($groups as $group)
@@ -42,7 +40,7 @@
                                         <h3 class="text-lg font-semibold text-gray-900 dark:text-gray-100">
                                             {{ $group->name }}
                                         </h3>
-                                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium {{ $group->is_active ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800' }}">
+                                        <span class="status-badge {{ $group->is_active ? 'status-badge-success' : 'status-badge-error' }}">
                                             {{ $group->is_active ? 'Active' : 'Inactive' }}
                                         </span>
                                     </div>
@@ -61,13 +59,20 @@
                                     <div class="flex space-x-2">
                                         @can('view', $organization)
                                             <a href="{{ route('organizations.groups.show', [$organization, $group]) }}" 
-                                               class="flex-1 bg-blue-500 hover:bg-blue-700 text-white text-center py-2 px-3 rounded text-sm">
+                                               class="flex-1 btn btn-primary text-center">
+                                                <svg class="h-4 w-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                                                </svg>
                                                 View
                                             </a>
                                         @endcan
                                         @can('update', $organization)
                                             <a href="{{ route('organizations.groups.edit', [$organization, $group]) }}" 
-                                               class="flex-1 bg-yellow-500 hover:bg-yellow-700 text-white text-center py-2 px-3 rounded text-sm">
+                                               class="flex-1 btn btn-warning text-center">
+                                                <svg class="h-4 w-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                                                </svg>
                                                 Edit
                                             </a>
                                         @endcan
@@ -89,7 +94,10 @@
                             @can('update', $organization)
                                 <div class="mt-6">
                                     <a href="{{ route('organizations.groups.create', $organization) }}" 
-                                       class="inline-flex items-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-green-600 hover:bg-green-700">
+                                       class="btn btn-success">
+                                        <svg class="h-4 w-4 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
+                                        </svg>
                                         Create Group
                                     </a>
                                 </div>

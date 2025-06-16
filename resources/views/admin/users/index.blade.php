@@ -5,33 +5,87 @@
                 <h1 class="text-2xl font-bold text-gray-800 dark:text-gray-100">{{ __('User Management') }}</h1>
                 <p class="text-gray-600 dark:text-gray-400 mt-1">{{ __('Manage users, roles, and organization memberships') }}</p>
             </div>
-            @can('create_users')
-                <a href="{{ route('admin.users.create') }}" 
-                   class="inline-flex items-center px-4 py-2 bg-blue-600 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-blue-700 focus:bg-blue-700 active:bg-blue-900 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition ease-in-out duration-150">
-                    <x-icon name="plus" class="h-4 w-4 mr-2" />
-                    {{ __('Create User') }}
-                </a>
-            @endcan
+            <div class="flex items-center space-x-3">
+                <!-- Quick Actions Dropdown -->
+                <div class="relative" x-data="{ open: false }">
+                    <button @click="open = !open" class="btn btn-secondary">
+                        <svg class="h-4 w-4 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 100 4m0-4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 100 4m0-4v2m0-6V4" />
+                        </svg>
+                        {{ __('Quick Actions') }}
+                        <svg class="h-4 w-4 ml-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+                        </svg>
+                    </button>
+                    <div x-show="open" @click.away="open = false" x-transition class="absolute right-0 mt-2 w-48 bg-white dark:bg-gray-800 rounded-md shadow-lg border border-gray-200 dark:border-gray-700 z-10">
+                        <div class="py-1">
+                            <a href="{{ route('roles.index') }}" class="block px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700">
+                                <svg class="h-4 w-4 mr-2 inline" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
+                                </svg>
+                                {{ __('Manage Roles') }}
+                            </a>
+                            <a href="{{ route('permissions.index') }}" class="block px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700">
+                                <svg class="h-4 w-4 mr-2 inline" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+                                </svg>
+                                {{ __('Manage Permissions') }}
+                            </a>
+                            <a href="{{ route('organizations.index') }}" class="block px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700">
+                                <svg class="h-4 w-4 mr-2 inline" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
+                                </svg>
+                                {{ __('Manage Organizations') }}
+                            </a>
+                        </div>
+                    </div>
+                </div>
+                
+                @can('create_users')
+                    <a href="{{ route('admin.users.create') }}" 
+                       class="btn btn-primary">
+                        <svg class="h-4 w-4 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
+                        </svg>
+                        {{ __('Create User') }}
+                    </a>
+                @endcan
+            </div>
         </div>
     </div>
 
-    <!-- Filters -->
+    <!-- Enhanced Filters -->
     <div class="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-6 mb-6">
-        <form method="GET" action="{{ route('admin.users.index') }}" class="grid grid-cols-1 md:grid-cols-4 gap-4">
+        <div class="flex items-center justify-between mb-4">
+            <h3 class="text-lg font-medium text-gray-900 dark:text-gray-100">{{ __('Filter Users') }}</h3>
+            <div class="flex items-center space-x-2">
+                <span class="text-sm text-gray-500 dark:text-gray-400">{{ __('Total:') }}</span>
+                <span class="text-sm font-semibold text-primary-600 dark:text-primary-400">{{ $users->total() }} {{ __('users') }}</span>
+            </div>
+        </div>
+        
+        <form method="GET" action="{{ route('admin.users.index') }}" class="grid grid-cols-1 md:grid-cols-4 lg:grid-cols-5 gap-4">
             <div>
                 <label for="search" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">{{ __('Search') }}</label>
-                <input type="text" name="search" id="search" value="{{ request('search') }}" 
-                       placeholder="{{ __('Name, email, or phone...') }}"
-                       class="w-full rounded-md border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white shadow-sm focus:border-blue-500 focus:ring-blue-500">
+                <div class="relative">
+                    <input type="text" name="search" id="search" value="{{ request('search') }}" 
+                           placeholder="{{ __('Name, email, or phone...') }}"
+                           class="form-input pl-10">
+                    <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                        <svg class="h-4 w-4 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                        </svg>
+                    </div>
+                </div>
             </div>
             
             <div>
                 <label for="role" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">{{ __('Role') }}</label>
-                <select name="role" id="role" class="w-full rounded-md border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white shadow-sm focus:border-blue-500 focus:ring-blue-500">
+                <select name="role" id="role" class="form-input">
                     <option value="">{{ __('All Roles') }}</option>
                     @foreach($roles as $role)
                         <option value="{{ $role->name }}" {{ request('role') === $role->name ? 'selected' : '' }}>
-                            {{ $role->name }}
+                            {{ $role->name }} ({{ $role->users->count() }})
                         </option>
                     @endforeach
                 </select>
@@ -39,20 +93,40 @@
             
             <div>
                 <label for="organization" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">{{ __('Organization') }}</label>
-                <select name="organization" id="organization" class="w-full rounded-md border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white shadow-sm focus:border-blue-500 focus:ring-blue-500">
+                <select name="organization" id="organization" class="form-input">
                     <option value="">{{ __('All Organizations') }}</option>
                     @foreach($organizations as $org)
                         <option value="{{ $org->id }}" {{ request('organization') == $org->id ? 'selected' : '' }}>
-                            {{ $org->name }}
+                            {{ $org->name }} ({{ $org->users->count() }})
                         </option>
                     @endforeach
                 </select>
             </div>
+
+            <div>
+                <label for="status" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">{{ __('Status') }}</label>
+                <select name="status" id="status" class="form-input">
+                    <option value="">{{ __('All Status') }}</option>
+                    <option value="verified" {{ request('status') === 'verified' ? 'selected' : '' }}>{{ __('Email Verified') }}</option>
+                    <option value="unverified" {{ request('status') === 'unverified' ? 'selected' : '' }}>{{ __('Email Unverified') }}</option>
+                    <option value="phone_verified" {{ request('status') === 'phone_verified' ? 'selected' : '' }}>{{ __('Phone Verified') }}</option>
+                </select>
+            </div>
             
-            <div class="flex items-end">
-                <button type="submit" class="w-full px-4 py-2 bg-gray-600 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-gray-700 focus:bg-gray-700 active:bg-gray-900 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2 transition ease-in-out duration-150">
+            <div class="flex items-end space-x-2">
+                <button type="submit" class="btn btn-primary flex-1">
+                    <svg class="h-4 w-4 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.207A1 1 0 013 6.5V4z" />
+                    </svg>
                     {{ __('Filter') }}
                 </button>
+                @if(request()->filled(['search', 'role', 'organization', 'status']))
+                    <a href="{{ route('admin.users.index') }}" class="btn btn-secondary">
+                        <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                        </svg>
+                    </a>
+                @endif
             </div>
         </form>
     </div>
@@ -88,8 +162,8 @@
                         <tr class="hover:bg-gray-50 dark:hover:bg-gray-700">
                             <td class="px-6 py-4 whitespace-nowrap">
                                 <div class="flex items-center">
-                                    <div class="w-10 h-10 bg-blue-100 dark:bg-blue-900 rounded-full flex items-center justify-center mr-3">
-                                        <span class="text-blue-600 dark:text-blue-400 font-semibold text-sm">
+                                    <div class="w-10 h-10 bg-primary-100 dark:bg-primary-900 rounded-full flex items-center justify-center mr-3">
+                                        <span class="text-primary-600 dark:text-primary-400 font-semibold text-sm">
                                             {{ $user->initials() }}
                                         </span>
                                     </div>
@@ -112,9 +186,9 @@
                             <td class="px-6 py-4">
                                 <div class="flex flex-wrap gap-1">
                                     @forelse($user->roles as $role)
-                                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium 
-                                                   {{ $role->name === 'Admin' ? 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200' : 
-                                                      ($role->name === 'Organization Manager' ? 'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200' : 
+                                        <span class="status-badge 
+                                                   {{ $role->name === 'Admin' ? 'status-danger' : 
+                                                      ($role->name === 'Organization Manager' ? 'status-primary' : 
                                                        'bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-300') }}">
                                             {{ $role->name }}
                                         </span>
@@ -152,32 +226,62 @@
                             <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
                                 <div class="flex items-center space-x-2">
                                     <a href="{{ route('admin.users.show', $user) }}" 
-                                       class="text-blue-600 hover:text-blue-900 dark:text-blue-400 dark:hover:text-blue-300">
-                                        <x-icon name="eye" class="h-4 w-4" />
+                                       class="btn-action btn-primary"
+                                       title="{{ __('View User Details') }}">
+                                        <svg class="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                                        </svg>
                                     </a>
+                                    
                                     @can('update_users')
                                         <a href="{{ route('admin.users.edit', $user) }}" 
-                                           class="text-yellow-600 hover:text-yellow-900 dark:text-yellow-400 dark:hover:text-yellow-300">
-                                            <x-icon name="settings" class="h-4 w-4" />
+                                           class="btn-action btn-warning"
+                                           title="{{ __('Edit User') }}">
+                                            <svg class="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                                            </svg>
                                         </a>
                                     @endcan
+                                    
                                     @can('manage_user_permissions')
                                         <a href="{{ route('admin.users.manage-roles', $user) }}" 
-                                           class="text-green-600 hover:text-green-900 dark:text-green-400 dark:hover:text-green-300">
-                                            <x-icon name="shield" class="h-4 w-4" />
+                                           class="btn-action btn-success"
+                                           title="{{ __('Manage Roles & Permissions') }}">
+                                            <svg class="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
+                                            </svg>
+                                        </a>
+                                        
+                                        <a href="{{ route('admin.users.manage-organizations', $user) }}" 
+                                           class="btn-action btn-info"
+                                           title="{{ __('Manage Organizations') }}">
+                                            <svg class="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
+                                            </svg>
                                         </a>
                                     @endcan
+                                    
                                     @can('delete_users')
                                         @if($user->id !== auth()->id())
                                             <form method="POST" action="{{ route('admin.users.destroy', $user) }}" class="inline">
                                                 @csrf
                                                 @method('DELETE')
                                                 <button type="submit" 
-                                                        onclick="return confirm('{{ __('Are you sure you want to delete this user?') }}')"
-                                                        class="text-red-600 hover:text-red-900 dark:text-red-400 dark:hover:text-red-300">
-                                                    <x-icon name="circle" class="h-4 w-4" />
+                                                        onclick="return confirm('{{ __('Are you sure you want to delete this user? This action cannot be undone.') }}')"
+                                                        class="btn-action btn-danger"
+                                                        title="{{ __('Delete User') }}">
+                                                    <svg class="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                                                    </svg>
                                                 </button>
                                             </form>
+                                        @else
+                                            <span class="btn-action btn-secondary opacity-50 cursor-not-allowed" title="{{ __('Cannot delete your own account') }}">
+                                                <svg class="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18.364 18.364A9 9 0 005.636 5.636m12.728 12.728L5.636 5.636m12.728 12.728L18.364 5.636M5.636 18.364l12.728-12.728" />
+                                                </svg>
+                                            </span>
                                         @endif
                                     @endcan
                                 </div>
@@ -205,8 +309,8 @@
     <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mt-6">
         <div class="bg-white dark:bg-gray-800 rounded-lg shadow-sm p-6 border border-gray-200 dark:border-gray-700">
             <div class="flex items-center">
-                <div class="w-12 h-12 bg-blue-100 dark:bg-blue-900 rounded-full flex items-center justify-center mr-4">
-                    <x-icon name="users" class="h-6 w-6 text-blue-600 dark:text-blue-400" />
+                <div class="w-12 h-12 bg-primary-100 dark:bg-primary-900 rounded-full flex items-center justify-center mr-4">
+                    <x-icon name="users" class="h-6 w-6 text-primary-600 dark:text-primary-400" />
                 </div>
                 <div>
                     <p class="text-sm font-medium text-gray-500 dark:text-gray-400">{{ __('Total Users') }}</p>
@@ -217,8 +321,8 @@
 
         <div class="bg-white dark:bg-gray-800 rounded-lg shadow-sm p-6 border border-gray-200 dark:border-gray-700">
             <div class="flex items-center">
-                <div class="w-12 h-12 bg-green-100 dark:bg-green-900 rounded-full flex items-center justify-center mr-4">
-                    <x-icon name="shield" class="h-6 w-6 text-green-600 dark:text-green-400" />
+                <div class="w-12 h-12 bg-success-100 dark:bg-success-900 rounded-full flex items-center justify-center mr-4">
+                    <x-icon name="shield" class="h-6 w-6 text-success-600 dark:text-success-400" />
                 </div>
                 <div>
                     <p class="text-sm font-medium text-gray-500 dark:text-gray-400">{{ __('Admin Users') }}</p>
@@ -229,8 +333,8 @@
 
         <div class="bg-white dark:bg-gray-800 rounded-lg shadow-sm p-6 border border-gray-200 dark:border-gray-700">
             <div class="flex items-center">
-                <div class="w-12 h-12 bg-purple-100 dark:bg-purple-900 rounded-full flex items-center justify-center mr-4">
-                    <x-icon name="office-building" class="h-6 w-6 text-purple-600 dark:text-purple-400" />
+                <div class="w-12 h-12 bg-info-100 dark:bg-info-900 rounded-full flex items-center justify-center mr-4">
+                    <x-icon name="office-building" class="h-6 w-6 text-info-600 dark:text-info-400" />
                 </div>
                 <div>
                     <p class="text-sm font-medium text-gray-500 dark:text-gray-400">{{ __('Org Members') }}</p>

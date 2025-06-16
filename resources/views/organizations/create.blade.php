@@ -47,7 +47,7 @@
                                 <div>
                                     <label class="flex items-center">
                                         <input type="checkbox" name="is_active" value="1" {{ old('is_active', true) ? 'checked' : '' }}
-                                               class="rounded border-gray-300 text-blue-600 shadow-sm focus:border-blue-300 focus:ring focus:ring-blue-200 focus:ring-opacity-50">
+                                               class="rounded border-gray-300 text-primary-600 shadow-sm focus:border-primary-300 focus:ring focus:ring-primary-200 focus:ring-opacity-50">
                                         <span class="ml-2 text-sm text-gray-700 dark:text-gray-300">Active</span>
                                     </label>
                                 </div>
@@ -66,6 +66,7 @@
                                     </label>
                                     <input type="email" name="email" id="email"
                                            class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white"
+                                           placeholder="Enter organization email address"
                                            value="{{ old('email') }}">
                                     @error('email')
                                         <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
@@ -79,6 +80,7 @@
                                     </label>
                                     <input type="text" name="phone" id="phone"
                                            class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white"
+                                           placeholder="Enter organization phone number"
                                            value="{{ old('phone') }}">
                                     @error('phone')
                                         <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
@@ -182,7 +184,7 @@
                                 Cancel
                             </a>
                             <button type="submit" 
-                                    class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded">
+                                    class="btn btn-success">
                                 Create Organization
                             </button>
                         </div>

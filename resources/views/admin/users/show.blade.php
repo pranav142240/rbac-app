@@ -5,17 +5,53 @@
                 <h1 class="text-2xl font-bold text-gray-800 dark:text-gray-100">{{ __('User Details') }}</h1>
                 <p class="text-gray-600 dark:text-gray-400 mt-1">{{ __('View user information and memberships') }}</p>
             </div>
-            <div class="flex items-center space-x-4">
+            <div class="flex items-center space-x-3">
+                @can('manage_user_permissions')
+                    <!-- Quick Management Dropdown -->
+                    <div class="relative" x-data="{ open: false }">
+                        <button @click="open = !open" class="btn btn-success">
+                            <svg class="h-4 w-4 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
+                            </svg>
+                            {{ __('Manage') }}
+                            <svg class="h-4 w-4 ml-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+                            </svg>
+                        </button>
+                        <div x-show="open" @click.away="open = false" x-transition class="absolute right-0 mt-2 w-56 bg-white dark:bg-gray-800 rounded-md shadow-lg border border-gray-200 dark:border-gray-700 z-10">
+                            <div class="py-1">
+                                <a href="{{ route('admin.users.manage-roles', $user) }}" class="block px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700">
+                                    <svg class="h-4 w-4 mr-2 inline" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
+                                    </svg>
+                                    {{ __('Roles & Groups') }}
+                                </a>
+                                <a href="{{ route('admin.users.manage-organizations', $user) }}" class="block px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700">
+                                    <svg class="h-4 w-4 mr-2 inline" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
+                                    </svg>
+                                    {{ __('Organizations') }}
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                @endcan
+                
                 @can('update_users')
                     <a href="{{ route('admin.users.edit', $user) }}" 
-                       class="inline-flex items-center px-4 py-2 bg-yellow-600 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-yellow-700 focus:bg-yellow-700 active:bg-yellow-900 focus:outline-none focus:ring-2 focus:ring-yellow-500 focus:ring-offset-2 transition ease-in-out duration-150">
-                        <x-icon name="settings" class="h-4 w-4 mr-2" />
+                       class="btn btn-warning">
+                        <svg class="h-4 w-4 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                    </svg>
                         {{ __('Edit User') }}
                     </a>
                 @endcan
+                
                 <a href="{{ route('admin.users.index') }}" 
-                   class="inline-flex items-center px-4 py-2 bg-gray-600 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-gray-700 focus:bg-gray-700 active:bg-gray-900 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2 transition ease-in-out duration-150">
-                    <x-icon name="list" class="h-4 w-4 mr-2" />
+                   class="btn btn-secondary">
+                    <svg class="h-4 w-4 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+                    </svg>
                     {{ __('Back to Users') }}
                 </a>
             </div>
@@ -32,8 +68,8 @@
                 </div>
                 <div class="p-6">
                     <div class="flex items-center mb-6">
-                        <div class="w-16 h-16 bg-blue-100 dark:bg-blue-900 rounded-full flex items-center justify-center mr-4">
-                            <span class="text-blue-600 dark:text-blue-400 font-bold text-xl">
+                        <div class="w-16 h-16 bg-primary-100 dark:bg-primary-900 rounded-full flex items-center justify-center mr-4">
+                            <span class="text-primary-600 dark:text-primary-400 font-bold text-xl">
                                 {{ $user->initials() }}
                             </span>
                         </div>
@@ -59,9 +95,9 @@
                             <label class="text-sm font-medium text-gray-500 dark:text-gray-400">{{ __('Email Verified') }}</label>
                             <p class="text-gray-900 dark:text-gray-100">
                                 @if($user->email_verified_at)
-                                    <span class="text-green-600 dark:text-green-400">✓ {{ $user->email_verified_at->format('M d, Y') }}</span>
+                                    <span class="text-success-600 dark:text-success-400">✓ {{ $user->email_verified_at->format('M d, Y') }}</span>
                                 @else
-                                    <span class="text-red-600 dark:text-red-400">✗ Not verified</span>
+                                    <span class="text-error-600 dark:text-error-400">✗ Not verified</span>
                                 @endif
                             </p>
                         </div>
@@ -69,9 +105,9 @@
                             <label class="text-sm font-medium text-gray-500 dark:text-gray-400">{{ __('Phone Verified') }}</label>
                             <p class="text-gray-900 dark:text-gray-100">
                                 @if($user->phone_verified_at)
-                                    <span class="text-green-600 dark:text-green-400">✓ {{ $user->phone_verified_at->format('M d, Y') }}</span>
+                                    <span class="text-success-600 dark:text-success-400">✓ {{ $user->phone_verified_at->format('M d, Y') }}</span>
                                 @else
-                                    <span class="text-red-600 dark:text-red-400">✗ Not verified</span>
+                                    <span class="text-error-600 dark:text-error-400">✗ Not verified</span>
                                 @endif
                             </p>
                         </div>
@@ -90,8 +126,8 @@
                             @foreach($user->authMethods as $method)
                                 <div class="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-700 rounded-lg">
                                     <div class="flex items-center">
-                                        <div class="w-10 h-10 bg-blue-100 dark:bg-blue-900 rounded-full flex items-center justify-center mr-3">
-                                            <x-icon name="key" class="h-5 w-5 text-blue-600 dark:text-blue-400" />
+                                        <div class="w-10 h-10 bg-primary-100 dark:bg-primary-900 rounded-full flex items-center justify-center mr-3">
+                                            <x-icon name="key" class="h-5 w-5 text-primary-600 dark:text-primary-400" />
                                         </div>
                                         <div>
                                             <h4 class="text-sm font-medium text-gray-900 dark:text-gray-100">
@@ -102,11 +138,11 @@
                                     </div>
                                     <div>
                                         @if($method->is_active && $method->auth_method_verified_at)
-                                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200">
+                                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-success-100 text-success-800 dark:bg-success-900 dark:text-success-200">
                                                 ✓ Active
                                             </span>
                                         @else
-                                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200">
+                                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-warning-100 text-warning-800 dark:bg-warning-900 dark:text-warning-200">
                                                 ⚠ Inactive
                                             </span>
                                         @endif
@@ -128,7 +164,7 @@
                     <h3 class="text-lg font-medium text-gray-900 dark:text-gray-100">{{ __('Roles') }}</h3>
                     @can('manage_user_permissions')
                         <a href="{{ route('admin.users.manage-roles', $user) }}" 
-                           class="text-blue-600 hover:text-blue-900 dark:text-blue-400 dark:hover:text-blue-300 text-sm">
+                           class="text-primary-600 hover:text-primary-700 dark:text-primary-400 dark:hover:text-primary-300 text-sm">
                             {{ __('Manage') }}
                         </a>
                     @endcan
@@ -155,7 +191,7 @@
                     <h3 class="text-lg font-medium text-gray-900 dark:text-gray-100">{{ __('Organizations') }}</h3>
                     @can('manage_user_permissions')
                         <a href="{{ route('admin.users.manage-organizations', $user) }}" 
-                           class="text-green-600 hover:text-green-900 dark:text-green-400 dark:hover:text-green-300 text-sm">
+                           class="text-success-600 hover:text-success-700 dark:text-success-400 dark:hover:text-success-300 text-sm">
                             {{ __('Manage') }}
                         </a>
                     @endcan

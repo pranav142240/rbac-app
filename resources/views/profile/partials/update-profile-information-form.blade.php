@@ -23,6 +23,7 @@
                 name="name"
                 type="text"
                 label="Name"
+                placeholder="Enter your full name"
                 :value="old('name', $user->name)"
                 required
                 autofocus
@@ -36,6 +37,7 @@
                 name="email"
                 type="email"
                 label="Email"
+                placeholder="Enter your email address"
                 :value="old('email', $user->email)"
                 required
                 autocomplete="username"
@@ -52,7 +54,7 @@
                     </p>
 
                     @if (session('status') === 'verification-link-sent')
-                        <p class="mt-2 font-medium text-sm text-green-600">
+                        <p class="mt-2 font-medium text-sm text-success-600 dark:text-success-400">
                             {{ __('A new verification link has been sent to your email address.') }}
                         </p>
                     @endif

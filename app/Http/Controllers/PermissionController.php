@@ -26,41 +26,54 @@ class PermissionController extends Controller
     public function index()
     {
         $permissions = Permission::with('roles')->get();
-          // Categorize permissions
+        // Categorize permissions
         $categorizedPermissions = [
             'User Management' => [
                 'icon' => 'users',
-                'color' => 'blue',
+                'color' => 'primary',
+                'description' => 'Manage user accounts, roles, and permissions',
                 'permissions' => []
             ],
             'Profile Management' => [
                 'icon' => 'user-circle',
-                'color' => 'green',
+                'color' => 'success',
+                'description' => 'Manage user profiles and security settings',
                 'permissions' => []
             ],
             'Role Management' => [
                 'icon' => 'shield-check',
-                'color' => 'purple',
+                'color' => 'info',
+                'description' => 'Create and manage system roles',
                 'permissions' => []
             ],
             'Permission Management' => [
                 'icon' => 'lock-closed',
-                'color' => 'red',
+                'color' => 'error',
+                'description' => 'Define and manage system permissions',
+                'permissions' => []
+            ],
+            'Organization Management' => [
+                'icon' => 'office-building',
+                'color' => 'warning',
+                'description' => 'Manage organizations and groups',
                 'permissions' => []
             ],
             'Content Management' => [
                 'icon' => 'document-text',
-                'color' => 'orange',
+                'color' => 'info',
+                'description' => 'Manage posts and content creation',
                 'permissions' => []
             ],
             'Own Content Management' => [
                 'icon' => 'pencil-alt',
-                'color' => 'indigo',
+                'color' => 'success',
+                'description' => 'Manage your own content and posts',
                 'permissions' => []
             ],
             'Other' => [
                 'icon' => 'cog',
-                'color' => 'gray',
+                'color' => 'secondary',
+                'description' => 'Miscellaneous system permissions',
                 'permissions' => []
             ]
         ];
@@ -85,6 +98,11 @@ class PermissionController extends Controller
             }            // Permission Management
             elseif (in_array($name, ['view_permissions', 'edit_permissions', 'update_permissions', 'delete_permissions'])) {
                 $categorizedPermissions['Permission Management']['permissions'][] = $permission;
+                $categorized = true;
+            }
+            // Organization Management
+            elseif (in_array($name, ['view_organizations', 'create_organizations', 'update_organizations', 'delete_organizations', 'manage_organizations', 'join_organizations', 'leave_organizations', 'view_organization_groups', 'create_organization_groups', 'update_organization_groups', 'delete_organization_groups', 'manage_organization_groups', 'join_organization_groups', 'leave_organization_groups'])) {
+                $categorizedPermissions['Organization Management']['permissions'][] = $permission;
                 $categorized = true;
             }
             // Content Management

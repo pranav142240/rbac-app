@@ -12,12 +12,12 @@
             <div class="flex space-x-2">
                 @can('update', $organization)
                     <a href="{{ route('organizations.edit', $organization) }}" 
-                       class="bg-yellow-500 hover:bg-yellow-700 text-white font-bold py-2 px-4 rounded">
+                       class="btn btn-warning">
                         Edit
                     </a>
                 @endcan
                 <a href="{{ route('organizations.members', $organization) }}" 
-                   class="bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded">
+                   class="btn btn-success">
                     Manage Members
                 </a>
             </div>
@@ -27,7 +27,7 @@
     <div class="py-12">
         <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
             @if(session('success'))
-                <div class="mb-4 bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded">
+                <div class="mb-4 alert alert-success">
                     {{ session('success') }}
                 </div>
             @endif
@@ -55,7 +55,7 @@
                                 <div>
                                     <dt class="text-sm font-medium text-gray-500 dark:text-gray-400">Status</dt>
                                     <dd>
-                                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium {{ $organization->is_active ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800' }}">
+                                        <span class="status-badge {{ $organization->is_active ? 'status-badge-success' : 'status-badge-error' }}">
                                             {{ $organization->is_active ? 'Active' : 'Inactive' }}
                                         </span>
                                     </dd>
@@ -117,21 +117,21 @@
             <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
                 <div class="bg-white dark:bg-gray-800 overflow-hidden shadow-sm sm:rounded-lg">
                     <div class="p-6 text-center">
-                        <div class="text-3xl font-bold text-blue-600">{{ $organization->users->count() }}</div>
+                        <div class="text-3xl font-bold text-primary-600 dark:text-primary-400">{{ $organization->users->count() }}</div>
                         <div class="text-sm text-gray-600 dark:text-gray-400">Total Members</div>
                     </div>
                 </div>
 
                 <div class="bg-white dark:bg-gray-800 overflow-hidden shadow-sm sm:rounded-lg">
                     <div class="p-6 text-center">
-                        <div class="text-3xl font-bold text-green-600">{{ $organization->organizationGroups->count() }}</div>
+                        <div class="text-3xl font-bold text-success-600 dark:text-success-400">{{ $organization->organizationGroups->count() }}</div>
                         <div class="text-sm text-gray-600 dark:text-gray-400">Total Groups</div>
                     </div>
                 </div>
 
                 <div class="bg-white dark:bg-gray-800 overflow-hidden shadow-sm sm:rounded-lg">
                     <div class="p-6 text-center">
-                        <div class="text-3xl font-bold text-purple-600">{{ $organization->activeGroups->count() }}</div>
+                        <div class="text-3xl font-bold text-info-600 dark:text-info-400">{{ $organization->activeGroups->count() }}</div>
                         <div class="text-sm text-gray-600 dark:text-gray-400">Active Groups</div>
                     </div>
                 </div>
@@ -144,7 +144,7 @@
                         <div class="flex justify-between items-center mb-4">
                             <h3 class="text-lg font-medium text-gray-900 dark:text-gray-100">Recent Members</h3>
                             <a href="{{ route('organizations.members', $organization) }}" 
-                               class="text-sm text-blue-600 hover:text-blue-800">
+                               class="text-sm text-primary-600 hover:text-primary-700 dark:text-primary-400 dark:hover:text-primary-300">
                                 View All
                             </a>
                         </div>
@@ -183,12 +183,12 @@
                             <h3 class="text-lg font-medium text-gray-900 dark:text-gray-100">Recent Groups</h3>
                             <div class="flex space-x-2">
                                 <a href="{{ route('organizations.groups.index', $organization) }}" 
-                                   class="text-sm text-blue-600 hover:text-blue-800">
+                                   class="text-sm text-primary-600 hover:text-primary-700 dark:text-primary-400 dark:hover:text-primary-300">
                                     View All
                                 </a>
                                 @can('update', $organization)
                                     <a href="{{ route('organizations.groups.create', $organization) }}" 
-                                       class="text-sm text-green-600 hover:text-green-800">
+                                       class="text-sm text-success-600 hover:text-success-700 dark:text-success-400 dark:hover:text-success-300">
                                         Create Group
                                     </a>
                                 @endcan

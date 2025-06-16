@@ -22,6 +22,7 @@
                     name="email"
                     type="email"
                     label="Email"
+                    placeholder="Your email address"
                     :value="old('email', $request->email)"
                     required
                     autofocus
@@ -36,6 +37,7 @@
                     name="password"
                     type="password"
                     label="Password"
+                    placeholder="Enter your new password"
                     required
                     autocomplete="new-password"
                 />
@@ -48,6 +50,7 @@
                     name="password_confirmation"
                     type="password"
                     label="Confirm Password"
+                    placeholder="Re-enter your new password"
                     required
                     autocomplete="new-password"
                 />

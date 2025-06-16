@@ -12,12 +12,18 @@
             <div class="flex space-x-2">
                 @can('update', $organization)
                     <a href="{{ route('organizations.groups.edit', [$organization, $group]) }}" 
-                       class="bg-yellow-500 hover:bg-yellow-700 text-white font-bold py-2 px-4 rounded">
+                       class="btn btn-warning">
+                        <svg class="h-4 w-4 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                        </svg>
                         Edit Group
                     </a>
                 @endcan
                 <a href="{{ route('organizations.groups.index', $organization) }}" 
-                   class="bg-gray-500 hover:bg-gray-700 text-white font-bold py-2 px-4 rounded">
+                   class="btn btn-secondary">
+                    <svg class="h-4 w-4 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+                    </svg>
                     Back to Groups
                 </a>
             </div>
@@ -27,13 +33,13 @@
     <div class="py-12">
         <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
             @if(session('success'))
-                <div class="mb-4 bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded">
+                <div class="alert alert-success mb-6">
                     {{ session('success') }}
                 </div>
             @endif
 
             @if($errors->any())
-                <div class="mb-4 bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded">
+                <div class="alert alert-error mb-6">
                     <ul>
                         @foreach($errors->all() as $error)
                             <li>{{ $error }}</li>
@@ -65,7 +71,7 @@
                                 <div>
                                     <dt class="text-sm font-medium text-gray-500 dark:text-gray-400">Status</dt>
                                     <dd>
-                                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium {{ $group->is_active ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800' }}">
+                                        <span class="status-badge {{ $group->is_active ? 'status-badge-success' : 'status-badge-error' }}">
                                             {{ $group->is_active ? 'Active' : 'Inactive' }}
                                         </span>
                                     </dd>
@@ -104,16 +110,15 @@
                                                 <label for="user_id" class="block text-sm font-medium text-gray-700 dark:text-gray-300">
                                                     Select User
                                                 </label>
-                                                <select name="user_id" id="user_id" required
-                                                        class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white">
-                                                    <option value="">Choose a user...</option>
-                                                    @foreach($availableUsers as $user)
-                                                        <option value="{{ $user->id }}">{{ $user->name }} ({{ $user->email }})</option>
-                                                    @endforeach
-                                                </select>
+                                                <x-searchable-select 
+                                                    name="user_id" 
+                                                    id="user_id" 
+                                                    :options="$availableUsers->map(fn($user) => ['id' => $user->id, 'name' => $user->name, 'email' => $user->email])->toArray()" 
+                                                    placeholder="Search users..."
+                                                    required="true" />
                                             </div>
                                             <button type="submit" 
-                                                    class="w-full bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded">
+                                                    class="w-full btn btn-success">
                                                 Add to Group
                                             </button>
                                         </div>
@@ -182,10 +187,9 @@
                                                           onsubmit="return confirm('Are you sure you want to remove this member from the group?')" class="inline">
                                                         @csrf
                                                         @method('DELETE')
-                                                        <button type="submit" 
-                                                                class="text-red-600 hover:text-red-900 dark:text-red-400 dark:hover:text-red-300">
-                                                            Remove
-                                                        </button>
+                                                        <button type="submit"                                                                class="text-error-600 hover:text-error-700 dark:text-error-400 dark:hover:text-error-300">
+                                                                Remove
+                                                            </button>
                                                     </form>
                                                 </td>
                                             @endcan

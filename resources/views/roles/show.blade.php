@@ -7,7 +7,7 @@
             </div>
             <div class="flex space-x-2">
                 @can('edit_roles')
-                <a href="{{ route('roles.edit', $role) }}" class="bg-yellow-500 hover:bg-yellow-700 text-white font-bold py-2 px-4 rounded">
+                <a href="{{ route('roles.edit', $role) }}" class="btn btn-warning">
                     {{ __('Edit Role') }}
                 </a>
                 @endcan
@@ -45,7 +45,7 @@
                                 {{ __('Total Permissions') }}
                             </label>
                             <p class="mt-1">
-                                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200">
+                                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-primary-100 text-primary-800 dark:bg-primary-900 dark:text-primary-200">
                                     {{ $role->permissions->count() }} permissions
                                 </span>
                             </p>
@@ -55,7 +55,7 @@
                                 {{ __('Users with this Role') }}
                             </label>
                             <p class="mt-1">
-                                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200">
+                                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-success-100 text-success-800 dark:bg-success-900 dark:text-success-200">
                                     {{ $role->users->count() }} users
                                 </span>
                             </p>
@@ -90,7 +90,7 @@
                                             <p class="text-xs text-gray-500 dark:text-gray-400">Guard: {{ $permission->guard_name }}</p>
                                         @endif
                                     </div>
-                                    <span class="px-2 py-1 text-xs bg-blue-100 text-blue-800 rounded-full dark:bg-blue-900 dark:text-blue-200">
+                                    <span class="px-2 py-1 text-xs bg-primary-100 text-primary-800 rounded-full dark:bg-primary-900 dark:text-primary-200">
                                         Permission
                                     </span>
                                 </div>
@@ -105,7 +105,7 @@
                             <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">{{ __('This role has no permissions assigned to it.') }}</p>
                             @can('edit_roles')
                             <div class="mt-6">
-                                <a href="{{ route('roles.edit', $role) }}" class="inline-flex items-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
+                                <a href="{{ route('roles.edit', $role) }}" class="btn btn-primary">
                                     {{ __('Assign Permissions') }}
                                 </a>
                             </div>

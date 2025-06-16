@@ -44,7 +44,7 @@
                             <div>
                                 <label class="flex items-center">
                                     <input type="checkbox" name="is_active" value="1" {{ old('is_active', true) ? 'checked' : '' }}
-                                           class="rounded border-gray-300 text-blue-600 shadow-sm focus:border-blue-300 focus:ring focus:ring-blue-200 focus:ring-opacity-50">
+                                           class="rounded border-gray-300 text-primary-600 shadow-sm focus:border-primary-300 focus:ring focus:ring-primary-200 focus:ring-opacity-50">
                                     <span class="ml-2 text-sm text-gray-700 dark:text-gray-300">Active</span>
                                 </label>
                             </div>
@@ -57,7 +57,7 @@
                                 Cancel
                             </a>
                             <button type="submit" 
-                                    class="bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded">
+                                    class="btn btn-success">
                                 Create Group
                             </button>
                         </div>
