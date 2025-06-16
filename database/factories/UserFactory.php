@@ -26,8 +26,16 @@ class UserFactory extends Factory
         return [
             'name' => fake()->name(),
             'email' => fake()->unique()->safeEmail(),
+            'phone' => fake()->unique()->e164PhoneNumber(),
             'email_verified_at' => now(),
+            'phone_verified_at' => now(),
             'password' => static::$password ??= Hash::make('password'),
+            'primary_auth_method' => fake()->randomElement([
+                'email_password',
+                'email_otp',
+                'phone_password',
+                'phone_otp'
+            ]),
             'remember_token' => Str::random(10),
         ];
     }
@@ -39,6 +47,36 @@ class UserFactory extends Factory
     {
         return $this->state(fn (array $attributes) => [
             'email_verified_at' => null,
+        ]);
+    }
+
+    /**
+     * Create a user with email authentication
+     */
+    public function emailAuth(): static
+    {
+        return $this->state(fn (array $attributes) => [
+            'primary_auth_method' => 'email_password',
+        ]);
+    }
+
+    /**
+     * Create a user with phone authentication
+     */
+    public function phoneAuth(): static
+    {
+        return $this->state(fn (array $attributes) => [
+            'primary_auth_method' => 'phone_password',
+        ]);
+    }
+
+    /**
+     * Create a user with OTP authentication
+     */
+    public function otpAuth(): static
+    {
+        return $this->state(fn (array $attributes) => [
+            'primary_auth_method' => fake()->randomElement(['email_otp', 'phone_otp']),
         ]);
     }
 }

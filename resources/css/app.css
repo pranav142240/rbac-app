@@ -1,11 +1,70 @@
-@import 'tailwindcss';
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
 
-@source '../../vendor/laravel/framework/src/Illuminate/Pagination/resources/views/*.blade.php';
-@source '../../storage/framework/views/*.php';
-@source '../**/*.blade.php';
-@source '../**/*.js';
+@layer base {
+    :root {
+        --sidebar-background: 255 255 255;
+        --sidebar-foreground: 15 23 42;
+        --sidebar-accent: 241 245 249;
+        --sidebar-accent-foreground: 15 23 42;
+        --sidebar-border: 226 232 240;
+        --sidebar-ring: 148 163 184;
+    }
+    
+    .dark {
+        --sidebar-background: 15 23 42;
+        --sidebar-foreground: 248 250 252;
+        --sidebar-accent: 30 41 59;
+        --sidebar-accent-foreground: 248 250 252;
+        --sidebar-border: 51 65 85;
+        --sidebar-ring: 100 116 139;
+    }
+}
 
-@theme {
-    --font-sans: 'Instrument Sans', ui-sans-serif, system-ui, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji',
-        'Segoe UI Symbol', 'Noto Color Emoji';
+@layer components {
+    .bg-sidebar {
+        background-color: rgb(var(--sidebar-background));
+    }
+    
+    .bg-sidebar-accent {
+        background-color: rgb(var(--sidebar-accent));
+    }
+    
+    .text-sidebar-foreground {
+        color: rgb(var(--sidebar-foreground));
+    }
+    
+    .text-sidebar-accent-foreground {
+        color: rgb(var(--sidebar-accent-foreground));
+    }
+    
+    .border-sidebar-border {
+        border-color: rgb(var(--sidebar-border));
+    }
+
+    .sidebar-transition {
+        transition: width 0.3s ease-in-out;
+    }
+    
+    .content-transition {
+        transition: margin-left 0.3s ease-in-out;
+    }
+
+    .custom-scrollbar::-webkit-scrollbar {
+        width: 6px;
+    }
+    
+    .custom-scrollbar::-webkit-scrollbar-track {
+        background: transparent;
+    }
+    
+    .custom-scrollbar::-webkit-scrollbar-thumb {
+        background: rgba(156, 163, 175, 0.5);
+        border-radius: 3px;
+    }
+    
+    .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+        background: rgba(156, 163, 175, 0.7);
+    }
 }

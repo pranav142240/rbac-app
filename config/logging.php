@@ -123,6 +123,22 @@ return [
             'handler' => NullHandler::class,
         ],
 
+        'audit' => [
+            'driver' => 'daily',
+            'path' => storage_path('logs/audit.log'),
+            'level' => env('LOG_LEVEL', 'info'),
+            'days' => env('LOG_AUDIT_DAYS', 90),
+            'replace_placeholders' => true,
+        ],
+
+        'security' => [
+            'driver' => 'daily', 
+            'path' => storage_path('logs/security.log'),
+            'level' => env('LOG_LEVEL', 'warning'),
+            'days' => env('LOG_SECURITY_DAYS', 365),
+            'replace_placeholders' => true,
+        ],
+
         'emergency' => [
             'path' => storage_path('logs/laravel.log'),
         ],
