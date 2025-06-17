@@ -141,7 +141,7 @@
             </div>
         </div>
 
-        <form method="POST" action="{{ route('auth.login') }}" id="loginForm" class="mt-8 space-y-6">
+        <form method="POST" action="{{ route('auth.login.post') }}" id="loginForm" class="mt-8 space-y-6">
             @csrf
             <input type="hidden" name="auth_type" id="auth_type_input" value="email_password">
 

@@ -2,16 +2,16 @@
     <div class="py-12">
         <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
             <div class="mb-8">
-                <h1 class="text-3xl font-bold text-gray-900">{{ __('Profile & Security') }}</h1>
-                <p class="mt-1 text-sm text-gray-600">
+                <h1 class="text-3xl font-bold text-gray-900 dark:text-gray-100">{{ __('Profile & Security') }}</h1>
+                <p class="mt-1 text-sm text-gray-600 dark:text-gray-400">
                     {{ __('Manage your profile information and authentication methods.') }}
                 </p>
             </div>
 
             <!-- Success Messages -->
             @if (session('success'))
-                <div class="rounded-md bg-success-50 p-4 mb-6">
-                    <div class="text-sm text-success-700">
+                <div class="rounded-md bg-success-50 dark:bg-success-900 p-4 mb-6">
+                    <div class="text-sm text-success-700 dark:text-success-200">
                         {{ session('success') }}
                     </div>
                 </div>
@@ -19,8 +19,8 @@
 
             <!-- Error Messages -->
             @if ($errors->any())
-                <div class="rounded-md bg-error-50 p-4 mb-6">
-                    <div class="text-sm text-error-700">
+                <div class="rounded-md bg-error-50 dark:bg-error-900 p-4 mb-6">
+                    <div class="text-sm text-error-700 dark:text-error-200">
                         <div class="font-medium">{{ __('Please fix the following errors:') }}</div>
                         <ul class="mt-2 list-disc list-inside">
                             @foreach ($errors->all() as $error)
@@ -52,6 +52,24 @@
                             </div>
 
                             <div>
+                                <x-input-label for="email" :value="__('Email Address')" />
+                                <x-text-input id="email" name="email" type="email" 
+                                             placeholder="Enter your email address"
+                                             class="mt-1 block w-full" :value="old('email', $user->email)" />
+                                <x-input-error class="mt-2" :messages="$errors->get('email')" />
+                                <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">Leave blank if you don't want to update</p>
+                            </div>
+
+                            <div>
+                                <x-input-label for="phone" :value="__('Phone Number')" />
+                                <x-text-input id="phone" name="phone" type="tel" 
+                                             placeholder="Enter your phone number (e.g., +1234567890)"
+                                             class="mt-1 block w-full" :value="old('phone', $user->phone)" />
+                                <x-input-error class="mt-2" :messages="$errors->get('phone')" />
+                                <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">Leave blank if you don't want to update</p>
+                            </div>
+
+                            <div>
                                 <x-input-label for="primary_auth_method" :value="__('Primary Authentication Method')" />
                                 <select id="primary_auth_method" name="primary_auth_method" class="form-input">
                                     @foreach($authMethods->groupBy('auth_method_type') as $type => $methods)
@@ -78,7 +96,7 @@
                 <div class="p-6">
                     <div class="flex justify-between items-center mb-4">
                         <h3 class="text-lg font-medium text-gray-900 dark:text-gray-100">Authentication Methods</h3>
-                        <button type="button" onclick="openAddMethodModal()" class="bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded-md text-sm">
+                        <button type="button" onclick="openAddMethodModal()" class="bg-primary-600 hover:bg-primary-700 dark:bg-primary-500 dark:hover:bg-primary-600 text-white px-4 py-2 rounded-md text-sm transition-colors duration-200">
                             Add Method
                         </button>
                     </div>
@@ -91,7 +109,7 @@
                                         <h4 class="font-medium text-gray-900 dark:text-gray-100">
                                             {{ ucfirst(str_replace('_', ' + ', $type)) }}
                                             @if($user->primary_auth_method === $type)
-                                                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800 ml-2">
+                                                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 dark:bg-green-900 text-green-800 dark:text-green-200 ml-2">
                                                     Primary
                                                 </span>
                                             @endif
@@ -100,9 +118,9 @@
                                             <p class="text-sm text-gray-600 dark:text-gray-400">
                                                 {{ $method->identifier }}
                                                 @if($method->isVerified())
-                                                    <span class="text-green-600 ml-2">✓ Verified</span>
+                                                    <span class="text-green-600 dark:text-green-400 ml-2">✓ Verified</span>
                                                 @else
-                                                    <span class="text-yellow-600 ml-2">⚠ Unverified</span>
+                                                    <span class="text-yellow-600 dark:text-yellow-400 ml-2">⚠ Unverified</span>
                                                 @endif
                                             </p>
                                         @endforeach
@@ -136,7 +154,7 @@
                             <h4 class="font-medium text-gray-900 dark:text-gray-100 mb-2">Your Roles</h4>
                             <div class="space-y-2">
                                 @forelse($roles as $role)
-                                    <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
+                                    <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-blue-100 dark:bg-blue-900 text-blue-800 dark:text-blue-200">
                                         {{ $role }}
                                     </span>
                                 @empty
@@ -184,7 +202,7 @@
                                 @empty
                                     <p class="text-sm text-gray-600 dark:text-gray-400">Not a member of any organizations</p>
                                     <a href="{{ route('organizations.index') }}" 
-                                       class="inline-flex items-center px-3 py-1 border border-primary-300 text-xs font-medium rounded-md text-primary-600 bg-white hover:bg-primary-50">
+                                       class="inline-flex items-center px-3 py-1 border border-primary-300 dark:border-primary-600 text-xs font-medium rounded-md text-primary-600 dark:text-primary-400 bg-white dark:bg-gray-700 hover:bg-primary-50 dark:hover:bg-gray-600">
                                         Explore Organizations
                                     </a>
                                 @endforelse
@@ -208,7 +226,7 @@
                                 @empty
                                     <p class="text-sm text-gray-600 dark:text-gray-400">Not a member of any groups</p>
                                     <a href="{{ route('organization-groups.index') }}" 
-                                       class="inline-flex items-center px-3 py-1 border border-primary-300 text-xs font-medium rounded-md text-primary-600 bg-white hover:bg-primary-50">
+                                       class="inline-flex items-center px-3 py-1 border border-primary-300 dark:border-primary-600 text-xs font-medium rounded-md text-primary-600 dark:text-primary-400 bg-white dark:bg-gray-700 hover:bg-primary-50 dark:hover:bg-gray-600">
                                         Explore Groups
                                     </a>
                                 @endforelse
@@ -245,7 +263,7 @@
                                 </p>
                             </div>
                             <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium 
-                                {{ $authMethods->where('auth_method_verified_at', '!=', null)->count() === $authMethods->count() ? 'bg-green-100 text-green-800' : 'bg-yellow-100 text-yellow-800' }}">
+                                {{ $authMethods->where('auth_method_verified_at', '!=', null)->count() === $authMethods->count() ? 'bg-green-100 dark:bg-green-900 text-green-800 dark:text-green-200' : 'bg-yellow-100 dark:bg-yellow-900 text-yellow-800 dark:text-yellow-200' }}">
                                 {{ $authMethods->where('auth_method_verified_at', '!=', null)->count() === $authMethods->count() ? 'Secure' : 'Needs Attention' }}
                             </span>
                         </div>
@@ -256,7 +274,7 @@
     </div>
 
     <!-- Add Method Modal -->
-    <div id="addMethodModal" class="fixed inset-0 bg-gray-600 bg-opacity-50 hidden">
+    <div id="addMethodModal" class="fixed inset-0 bg-gray-600 dark:bg-gray-900 bg-opacity-50 dark:bg-opacity-75 hidden">
         <div class="flex items-center justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0">
             <div class="inline-block align-bottom bg-white dark:bg-gray-800 rounded-lg text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-lg sm:w-full">
                 <form id="addMethodForm">
@@ -281,14 +299,16 @@
                                 <x-input-label for="new_identifier" :value="__('Email/Phone')" />
                                 <x-text-input id="new_identifier" name="identifier" type="text" 
                                              placeholder="Enter email or phone number"
-                                             class="mt-1 block w-full" />
+                                             class="mt-1 block w-full" 
+                                             required />
                             </div>
 
                             <div id="new_password_section" class="hidden">
                                 <x-input-label for="new_password" :value="__('Password')" />
                                 <x-text-input id="new_password" name="password" type="password" 
-                                             placeholder="Enter password"
-                                             class="mt-1 block w-full" />
+                                             placeholder="Enter password (min 8 characters)"
+                                             class="mt-1 block w-full" 
+                                             minlength="8" />
                             </div>
                         </div>
                     </div>
@@ -297,7 +317,7 @@
                         <x-primary-button type="submit" class="sm:ml-3">
                             Add Method
                         </x-primary-button>
-                        <button type="button" onclick="closeAddMethodModal()" class="mt-3 w-full inline-flex justify-center rounded-md border border-gray-300 shadow-sm px-4 py-2 bg-white text-base font-medium text-gray-700 hover:bg-gray-50 focus:outline-none sm:mt-0 sm:ml-3 sm:w-auto sm:text-sm">
+                        <button type="button" onclick="closeAddMethodModal()" class="mt-3 w-full inline-flex justify-center rounded-md border border-gray-300 dark:border-gray-600 shadow-sm px-4 py-2 bg-white dark:bg-gray-700 text-base font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-600 focus:outline-none sm:mt-0 sm:ml-3 sm:w-auto sm:text-sm">
                             Cancel
                         </button>
                     </div>
@@ -307,7 +327,7 @@
     </div>
 
     <!-- Change Primary Method Modal -->
-    <div id="primaryMethodModal" class="fixed inset-0 bg-gray-600 bg-opacity-50 hidden">
+    <div id="primaryMethodModal" class="fixed inset-0 bg-gray-600 dark:bg-gray-900 bg-opacity-50 dark:bg-opacity-75 hidden">
         <div class="flex items-center justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0">
             <div class="inline-block align-bottom bg-white dark:bg-gray-800 rounded-lg text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-lg sm:w-full">
                 <form id="primaryMethodForm">
@@ -338,7 +358,7 @@
                         <x-primary-button type="submit" class="sm:ml-3">
                             Update Primary Method
                         </x-primary-button>
-                        <button type="button" onclick="closePrimaryMethodModal()" class="mt-3 w-full inline-flex justify-center rounded-md border border-gray-300 shadow-sm px-4 py-2 bg-white text-base font-medium text-gray-700 hover:bg-gray-50 focus:outline-none sm:mt-0 sm:ml-3 sm:w-auto sm:text-sm">
+                        <button type="button" onclick="closePrimaryMethodModal()" class="mt-3 w-full inline-flex justify-center rounded-md border border-gray-300 dark:border-gray-600 shadow-sm px-4 py-2 bg-white dark:bg-gray-700 text-base font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-600 focus:outline-none sm:mt-0 sm:ml-3 sm:w-auto sm:text-sm">
                             Cancel
                         </button>
                     </div>
@@ -354,15 +374,59 @@
 
         function closeAddMethodModal() {
             document.getElementById('addMethodModal').classList.add('hidden');
-            document.getElementById('addMethodForm').reset();
+            
+            // Reset form and hide all dynamic sections
+            const form = document.getElementById('addMethodForm');
+            form.reset();
+            
+            // Hide identifier and password sections
+            document.getElementById('new_identifier_section').classList.add('hidden');
+            document.getElementById('new_password_section').classList.add('hidden');
+            
+            // Remove required attributes
+            document.getElementById('new_identifier').removeAttribute('required');
+            document.getElementById('new_password').removeAttribute('required');
         }
 
         // Handle add method form submission
         document.getElementById('addMethodForm').addEventListener('submit', function(e) {
             e.preventDefault();
             
+            // Get form data
             const formData = new FormData(this);
             const methodType = formData.get('auth_method_type');
+            
+            console.log('Form submission started', {
+                methodType: methodType,
+                identifier: formData.get('identifier'),
+                hasPassword: !!formData.get('password')
+            });
+            
+            // Validate required fields
+            if (!methodType) {
+                alert('Please select an authentication method');
+                return;
+            }
+            
+            if (methodType !== 'google_sso') {
+                const identifier = formData.get('identifier');
+                if (!identifier || identifier.trim() === '') {
+                    alert('Please enter your email or phone number');
+                    return;
+                }
+                
+                if (methodType.includes('password')) {
+                    const password = formData.get('password');
+                    if (!password || password.trim() === '') {
+                        alert('Please enter a password');
+                        return;
+                    }
+                    if (password.length < 8) {
+                        alert('Password must be at least 8 characters long');
+                        return;
+                    }
+                }
+            }
             
             // Handle Google SSO differently
             if (methodType === 'google_sso') {
@@ -371,32 +435,73 @@
                 return;
             }
             
+            // Show loading state
+            const submitButton = this.querySelector('button[type="submit"]');
+            const originalText = submitButton.textContent;
+            submitButton.disabled = true;
+            submitButton.textContent = 'Adding...';
+            
+            // Check if CSRF token exists
+            const csrfToken = document.querySelector('meta[name="csrf-token"]');
+            if (!csrfToken) {
+                console.error('CSRF token not found');
+                alert('Security token not found. Please refresh the page and try again.');
+                submitButton.disabled = false;
+                submitButton.textContent = originalText;
+                return;
+            }
+            
+            console.log('Making fetch request to:', '{{ route("auth.add-method") }}');
+            
             fetch('{{ route("auth.add-method") }}', {
                 method: 'POST',
                 body: formData,
                 headers: {
-                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+                    'X-CSRF-TOKEN': csrfToken.getAttribute('content'),
+                    'Accept': 'application/json'
                 }
             })
-            .then(response => response.json())
+            .then(response => {
+                console.log('Response received:', response.status, response.statusText);
+                
+                if (!response.ok) {
+                    return response.json().then(data => {
+                        console.error('Server error:', data);
+                        return Promise.reject(data);
+                    });
+                }
+                return response.json();
+            })
             .then(data => {
+                console.log('Success response:', data);
                 if (data.message) {
                     alert('Authentication method added successfully!');
                     closeAddMethodModal();
                     location.reload();
                 } else if (data.error) {
                     alert('Error: ' + data.error);
-                } else if (data.errors) {
-                    let errorMsg = 'Validation errors:\n';
-                    for (let field in data.errors) {
-                        errorMsg += data.errors[field].join('\n') + '\n';
-                    }
-                    alert(errorMsg);
                 }
             })
             .catch(error => {
-                console.error('Error:', error);
-                alert('Error adding authentication method');
+                console.error('Request failed:', error);
+                if (error.errors) {
+                    let errorMsg = 'Validation errors:\n';
+                    for (let field in error.errors) {
+                        errorMsg += '• ' + error.errors[field].join('\n• ') + '\n';
+                    }
+                    alert(errorMsg);
+                } else if (error.error) {
+                    alert('Error: ' + error.error);
+                } else if (error.message) {
+                    alert('Error: ' + error.message);
+                } else {
+                    alert('Error adding authentication method. Please check the console for details and try again.');
+                }
+            })
+            .finally(() => {
+                // Reset button state
+                submitButton.disabled = false;
+                submitButton.textContent = originalText;
             });
         });
 
@@ -406,14 +511,18 @@
             const identifierSection = document.getElementById('new_identifier_section');
             const passwordSection = document.getElementById('new_password_section');
             const identifierInput = document.getElementById('new_identifier');
+            const passwordInput = document.getElementById('new_password');
             const identifierLabel = identifierSection.querySelector('label');
 
-            // Reset sections
+            // Reset sections and remove required attributes
             identifierSection.classList.add('hidden');
             passwordSection.classList.add('hidden');
+            identifierInput.removeAttribute('required');
+            passwordInput.removeAttribute('required');
 
             if (methodType && methodType !== 'google_sso') {
                 identifierSection.classList.remove('hidden');
+                identifierInput.setAttribute('required', 'required');
                 
                 // Update label and input type
                 if (methodType.includes('email')) {
@@ -423,12 +532,13 @@
                 } else if (methodType.includes('phone')) {
                     identifierLabel.textContent = 'Phone Number';
                     identifierInput.type = 'tel';
-                    identifierInput.placeholder = 'Enter phone number';
+                    identifierInput.placeholder = 'Enter phone number (e.g., +1234567890)';
                 }
 
                 // Show password field for password methods
                 if (methodType.includes('password')) {
                     passwordSection.classList.remove('hidden');
+                    passwordInput.setAttribute('required', 'required');
                 }
             }
         });

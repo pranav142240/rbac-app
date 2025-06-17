@@ -3,6 +3,8 @@
 namespace App\Http\Controllers;
 
 use App\Http\Controllers\Controller;
+use App\Http\Requests\Role\StoreRoleRequest;
+use App\Http\Requests\Role\UpdateRoleRequest;
 use Illuminate\Http\Request;
 use Spatie\Permission\Models\Role;
 use Spatie\Permission\Models\Permission;
@@ -38,28 +40,25 @@ class RoleController extends Controller
     {
         $permissions = Permission::all();
         return view('roles.create', compact('permissions'));
-    }
-
-    /**
+    }    /**
      * Store a newly created resource in storage.
      */
-    public function store(Request $request)
+    public function store(StoreRoleRequest $request)
     {
-        $request->validate([
-            'name' => 'required|string|max:255|unique:roles,name',
-            'guard_name' => 'nullable|string|max:255',
-            'permissions' => 'array',
-            'permissions.*' => 'exists:permissions,id'
-        ]);
-
-        DB::transaction(function () use ($request) {
+        $validated = $request->validated();
+        
+        DB::transaction(function () use ($validated) {
             $role = Role::create([
-                'name' => $request->name,
-                'guard_name' => $request->guard_name ?? 'web'
+                'name' => $validated['name'],
+                'guard_name' => $validated['guard_name']
             ]);
 
-            if ($request->has('permissions')) {
-                $role->syncPermissions($request->permissions);
+            if (!empty($validated['permissions'])) {
+                // Convert permission IDs to permission names for Spatie
+                $permissionNames = Permission::whereIn('id', $validated['permissions'])
+                    ->pluck('name')
+                    ->toArray();
+                $role->syncPermissions($permissionNames);
             }
         });
 
@@ -84,28 +83,25 @@ class RoleController extends Controller
         $permissions = Permission::all();
         $rolePermissions = $role->permissions->pluck('id')->toArray();
         return view('roles.edit', compact('role', 'permissions', 'rolePermissions'));
-    }
-
-    /**
+    }    /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, Role $role)
+    public function update(UpdateRoleRequest $request, Role $role)
     {
-        $request->validate([
-            'name' => 'required|string|max:255|unique:roles,name,' . $role->id,
-            'guard_name' => 'nullable|string|max:255',
-            'permissions' => 'array',
-            'permissions.*' => 'exists:permissions,id'
-        ]);
-
-        DB::transaction(function () use ($request, $role) {
+        $validated = $request->validated();
+        
+        DB::transaction(function () use ($validated, $role) {
             $role->update([
-                'name' => $request->name,
-                'guard_name' => $request->guard_name ?? 'web'
+                'name' => $validated['name'],
+                'guard_name' => $validated['guard_name']
             ]);
 
-            if ($request->has('permissions')) {
-                $role->syncPermissions($request->permissions);
+            if (!empty($validated['permissions'])) {
+                // Convert permission IDs to permission names for Spatie
+                $permissionNames = Permission::whereIn('id', $validated['permissions'])
+                    ->pluck('name')
+                    ->toArray();
+                $role->syncPermissions($permissionNames);
             } else {
                 $role->syncPermissions([]);
             }

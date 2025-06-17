@@ -14,13 +14,13 @@ use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Str;
 use Laravel\Socialite\Facades\Socialite;
 use GuzzleHttp\Client;
+use Spatie\Permission\Models\Role;
 
 class AuthService
 {
     /**
      * Register a new user with primary authentication method
-     */
-    public function register(array $data)
+     */    public function register(array $data)
     {
         $user = User::create([
             'name' => $data['name'],
@@ -29,6 +29,10 @@ class AuthService
             'password' => isset($data['password']) ? Hash::make($data['password']) : null,
             'primary_auth_method' => $data['auth_method_type'],
         ]);        
+        
+        // Assign the default "Application User" role
+        $this->assignDefaultRole($user);
+        
         $authMethod = $this->createAuthMethod($user, $data);
 
         return [
@@ -583,8 +587,7 @@ class AuthService
 
     /**
      * Create new user from Google OAuth
-     */
-    private function createUserFromGoogle($providerUser)
+     */    private function createUserFromGoogle($providerUser)
     {        // Create user
         $user = User::create([
             'name' => $providerUser->getName(),
@@ -593,6 +596,9 @@ class AuthService
             'primary_auth_method' => 'google_sso',
             'is_active' => true,
         ]);
+
+        // Assign the default "Application User" role
+        $this->assignDefaultRole($user);
 
         // Create social account record
         $user->linkSocialAccount('google', $providerUser);
@@ -699,6 +705,29 @@ class AuthService
                 'request_params' => request()->all()
             ]);
             throw new \Exception('Google authentication failed: ' . $e->getMessage());
+        }
+    }
+
+    /**
+     * Assign the default "Application User" role to a user
+     */
+    private function assignDefaultRole(User $user)
+    {
+        // Check if user already has any roles
+        if ($user->roles()->count() === 0) {
+            $applicationUserRole = Role::where('name', 'Application User')->first();
+            if ($applicationUserRole) {
+                $user->assignRole($applicationUserRole);
+                \Log::info('Default Application User role assigned', [
+                    'user_id' => $user->id,
+                    'role' => 'Application User'
+                ]);
+            } else {
+                \Log::warning('Application User role not found', [
+                    'user_id' => $user->id,
+                    'available_roles' => Role::pluck('name')->toArray()
+                ]);
+            }
         }
     }
 }

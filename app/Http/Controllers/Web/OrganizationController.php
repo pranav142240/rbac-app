@@ -5,6 +5,8 @@ namespace App\Http\Controllers\Web;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Organization\StoreOrganizationRequest;
 use App\Http\Requests\Organization\UpdateOrganizationRequest;
+use App\Http\Requests\Organization\AssignUserRequest;
+use App\Http\Requests\Organization\RemoveUserRequest;
 use App\Models\Organization;
 use App\Models\OrganizationGroup;
 use App\Models\User;
@@ -20,14 +22,13 @@ class OrganizationController extends Controller
     public function __construct(PermissionService $permissionService)
     {
         $this->permissionService = $permissionService;
-    }
-
-    /**
+    }    /**
      * Display a listing of organizations.
      */
     public function index(Request $request): View
     {
-        $organizations = Organization::with(['organizationGroup', 'users'])
+        $organizations = Organization::accessibleByUser(auth()->user())
+            ->with(['organizationGroup', 'users'])
             ->withCount('users')
             ->when($request->search, function ($query, $search) {
                 return $query->where('name', 'like', "%{$search}%")
@@ -170,18 +171,14 @@ class OrganizationController extends Controller
             ->withQueryString();
 
         return view('organizations.users', compact('organization', 'users'));
-    }
-
-    /**
+    }    /**
      * Assign user to organization.
      */
-    public function assignUser(Request $request, Organization $organization): RedirectResponse
+    public function assignUser(AssignUserRequest $request, Organization $organization): RedirectResponse
     {
-        $request->validate([
-            'user_id' => 'required|exists:users,id'
-        ]);
-
-        $user = User::findOrFail($request->user_id);
+        $validated = $request->validated();
+        
+        $user = User::findOrFail($validated['user_id']);
 
         if ($organization->users()->where('user_id', $user->id)->exists()) {
             return redirect()->back()
@@ -192,18 +189,14 @@ class OrganizationController extends Controller
 
         return redirect()->back()
             ->with('success', 'User assigned to organization successfully.');
-    }
-
-    /**
+    }    /**
      * Remove user from organization.
      */
-    public function removeUser(Request $request, Organization $organization): RedirectResponse
+    public function removeUser(RemoveUserRequest $request, Organization $organization): RedirectResponse
     {
-        $request->validate([
-            'user_id' => 'required|exists:users,id'
-        ]);
-
-        $organization->users()->detach($request->user_id);
+        $validated = $request->validated();
+        
+        $organization->users()->detach($validated['user_id']);
 
         return redirect()->back()
             ->with('success', 'User removed from organization successfully.');

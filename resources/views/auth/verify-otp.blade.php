@@ -18,7 +18,7 @@
             </div>
         @endif
 
-        <form method="POST" action="{{ route('auth.verify-otp') }}" class="mt-8 space-y-6">
+        <form method="POST" action="{{ route('auth.verify-otp.post') }}" class="mt-8 space-y-6">
             @csrf
             <input type="hidden" name="identifier" value="{{ session('identifier') }}">
             <input type="hidden" name="type" value="{{ session('type') }}">

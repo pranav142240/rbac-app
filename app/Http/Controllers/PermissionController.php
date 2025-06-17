@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Http\Controllers\Controller;
+use App\Http\Requests\Permission\UpdatePermissionRequest;
 use Illuminate\Http\Request;
 use Spatie\Permission\Models\Permission;
 use Spatie\Permission\Models\Role;
@@ -148,16 +149,13 @@ class PermissionController extends Controller
     /**
      * Update the specified permission in storage.
      */
-    public function update(Request $request, Permission $permission)
+    public function update(UpdatePermissionRequest $request, Permission $permission)
     {
-        $request->validate([
-            'name' => 'required|string|max:255|unique:permissions,name,' . $permission->id,
-            'guard_name' => 'nullable|string|max:255',
-        ]);
-
+        $validated = $request->validated();
+        
         $permission->update([
-            'name' => $request->name,
-            'guard_name' => $request->guard_name ?? 'web'
+            'name' => $validated['name'],
+            'guard_name' => $validated['guard_name']
         ]);
 
         return redirect()->route('permissions.index')

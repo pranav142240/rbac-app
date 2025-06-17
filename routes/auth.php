@@ -14,15 +14,23 @@ use Illuminate\Support\Facades\Route;
 Route::middleware('guest')->group(function () {
     // Multi-Auth Registration
     Route::get('auth/register', [MultiAuthController::class, 'showRegisterForm'])->name('auth.register');
-    Route::post('auth/register', [MultiAuthController::class, 'register']);    // Multi-Auth Login
+    Route::post('auth/register', [MultiAuthController::class, 'register'])->name('auth.register.post');
+
+    // Multi-Auth Login
     Route::get('auth/login', [MultiAuthController::class, 'showLoginForm'])->name('auth.login');
-    Route::post('auth/login', [MultiAuthController::class, 'login'])->name('auth.login.post');// OTP Routes
+    Route::post('auth/login', [MultiAuthController::class, 'login'])->name('auth.login.post');
+
+    // OTP Routes
     Route::get('auth/verify-otp', [MultiAuthController::class, 'showOtpForm'])->name('auth.verify-otp');
-    Route::post('auth/verify-otp', [MultiAuthController::class, 'verifyOtp']);
-    Route::post('auth/send-otp', [MultiAuthController::class, 'sendOtp'])->name('auth.send-otp');    // Magic Link Routes
+    Route::post('auth/verify-otp', [MultiAuthController::class, 'verifyOtp'])->name('auth.verify-otp.post');
+    Route::post('auth/send-otp', [MultiAuthController::class, 'sendOtp'])->name('auth.send-otp');
+
+    // Magic Link Routes
     Route::get('auth/magic-link', [MultiAuthController::class, 'showMagicLinkForm'])->name('auth.magic-link');
     Route::post('auth/magic-link', [MultiAuthController::class, 'sendMagicLink'])->name('auth.send-magic-link');
-    Route::get('auth/magic-link/verify/{token}', [MultiAuthController::class, 'verifyMagicLink'])->name('auth.magic-link.verify');    // Google SSO Routes
+    Route::get('auth/magic-link/verify/{token}', [MultiAuthController::class, 'verifyMagicLink'])->name('auth.magic-link.verify');
+
+    // Google SSO Routes
     Route::get('auth/google', [MultiAuthController::class, 'redirectToGoogle'])->name('auth.google');
     Route::get('auth/google/callback', [MultiAuthController::class, 'handleGoogleCallback'])->name('auth.google.callback');
 
@@ -64,7 +72,9 @@ Route::middleware('auth')->group(function () {
     Route::get('confirm-password', [ConfirmablePasswordController::class, 'show'])
         ->name('password.confirm');
 
-    Route::post('confirm-password', [ConfirmablePasswordController::class, 'store']);    Route::put('password', [PasswordController::class, 'update'])->name('password.update');
+    Route::post('confirm-password', [ConfirmablePasswordController::class, 'store'])->name('password.confirm.post');
+
+    Route::put('password', [PasswordController::class, 'update'])->name('password.update');
 
     Route::post('logout', [MultiAuthController::class, 'logout'])
         ->name('logout');

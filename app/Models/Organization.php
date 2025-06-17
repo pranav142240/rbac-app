@@ -110,6 +110,22 @@ class Organization extends Model
     }
 
     /**
+     * Scope for organizations accessible by user
+     */
+    public function scopeAccessibleByUser($query, User $user)
+    {
+        // Super admins and admins can see all organizations
+        if ($user->hasRole(['Super Admin', 'Admin'])) {
+            return $query;
+        }
+
+        // Regular users can only see organizations they belong to
+        return $query->whereHas('users', function ($q) use ($user) {
+            $q->where('user_id', $user->id);
+        });
+    }
+
+    /**
      * Get the full address
      */
     public function getFullAddressAttribute(): string

@@ -3,21 +3,22 @@
 namespace App\Http\Controllers;
 
 use App\Http\Controllers\Controller;
+use App\Http\Requests\Org\StoreOrgRequest;
+use App\Http\Requests\Org\UpdateOrgRequest;
 use App\Models\Organization;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Validation\Rule;
 
 class OrgController extends Controller
-{
-    /**
+{    /**
      * Display a listing of organizations.
      */
     public function index()
     {
         $organizations = Organization::active()
+                                   ->accessibleByUser(Auth::user())
                                    ->with(['users'])
                                    ->withCount(['users', 'organizationGroups'])
                                    ->paginate(15);
@@ -33,31 +34,13 @@ class OrgController extends Controller
         $this->authorize('create', Organization::class);
 
         return view('organizations.create');
-    }
-
-    /**
+    }    /**
      * Store a newly created organization in storage.
      */
-    public function store(Request $request)
+    public function store(StoreOrgRequest $request)
     {
-        $this->authorize('create', Organization::class);
-
-        $validated = $request->validate([
-            'name' => 'required|string|max:255|unique:organizations,name',
-            'description' => 'nullable|string|max:1000',
-            'email' => 'nullable|email|max:255',
-            'phone' => 'nullable|string|max:20',
-            'website' => 'nullable|url|max:255',
-            'address' => 'nullable|string|max:255',
-            'city' => 'nullable|string|max:100',
-            'state' => 'nullable|string|max:100',
-            'country' => 'nullable|string|max:100',
-            'postal_code' => 'nullable|string|max:20',
-            'is_active' => 'boolean',
-        ]);
-
-        $validated['is_active'] = $request->has('is_active');
-
+        $validated = $request->validated();
+        
         DB::transaction(function () use ($validated) {
             $organization = Organization::create($validated);
             
@@ -101,36 +84,13 @@ class OrgController extends Controller
         $this->authorize('update', $organization);
 
         return view('organizations.edit', compact('organization'));
-    }
-
-    /**
+    }    /**
      * Update the specified organization in storage.
      */
-    public function update(Request $request, Organization $organization)
+    public function update(UpdateOrgRequest $request, Organization $organization)
     {
-        $this->authorize('update', $organization);
-
-        $validated = $request->validate([
-            'name' => [
-                'required',
-                'string',
-                'max:255',
-                Rule::unique('organizations', 'name')->ignore($organization->id),
-            ],
-            'description' => 'nullable|string|max:1000',
-            'email' => 'nullable|email|max:255',
-            'phone' => 'nullable|string|max:20',
-            'website' => 'nullable|url|max:255',
-            'address' => 'nullable|string|max:255',
-            'city' => 'nullable|string|max:100',
-            'state' => 'nullable|string|max:100',
-            'country' => 'nullable|string|max:100',
-            'postal_code' => 'nullable|string|max:20',
-            'is_active' => 'boolean',
-        ]);
-
-        $validated['is_active'] = $request->has('is_active');
-
+        $validated = $request->validated();
+        
         $organization->update($validated);
 
         return redirect()

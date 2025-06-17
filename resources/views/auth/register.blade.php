@@ -79,7 +79,7 @@
             </div>
         </div>
 
-        <form method="POST" action="{{ route('auth.register') }}" id="registerForm" class="mt-8 space-y-6">
+        <form method="POST" action="{{ route('auth.register.post') }}" id="registerForm" class="mt-8 space-y-6">
             @csrf
 
             <!-- Authentication Method Selector -->

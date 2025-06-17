@@ -3,13 +3,15 @@
 namespace App\Http\Controllers;
 
 use App\Http\Controllers\Controller;
+use App\Http\Requests\OrganizationGroup\StoreOrganizationGroupRequest;
+use App\Http\Requests\OrganizationGroup\UpdateOrganizationGroupRequest;
+use App\Http\Requests\OrganizationGroup\AddUserRequest;
 use App\Models\Organization;
 use App\Models\OrganizationGroup;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Validation\Rule;
 
 class OrganizationGroupController extends Controller
 {
@@ -36,31 +38,13 @@ class OrganizationGroupController extends Controller
         $this->authorize('update', $organization);
 
         return view('organizations.groups.create', compact('organization'));
-    }
-
-    /**
+    }    /**
      * Store a newly created group in storage.
      */
-    public function store(Request $request, Organization $organization)
+    public function store(StoreOrganizationGroupRequest $request, Organization $organization)
     {
-        $this->authorize('update', $organization);
-
-        $validated = $request->validate([
-            'name' => [
-                'required',
-                'string',
-                'max:255',
-                Rule::unique('organization_groups')->where(function ($query) use ($organization) {
-                    return $query->where('organization_id', $organization->id);
-                }),
-            ],
-            'description' => 'nullable|string|max:1000',
-            'is_active' => 'boolean',
-        ]);
-
-        $validated['organization_id'] = $organization->id;
-        $validated['is_active'] = $request->has('is_active');
-
+        $validated = $request->validated();
+        
         $group = OrganizationGroup::create($validated);
 
         return redirect()
@@ -93,30 +77,13 @@ class OrganizationGroupController extends Controller
         $this->authorize('update', $organization);
 
         return view('organizations.groups.edit', compact('organization', 'organizationGroup'));
-    }
-
-    /**
+    }    /**
      * Update the specified group in storage.
      */
-    public function update(Request $request, Organization $organization, OrganizationGroup $organizationGroup)
+    public function update(UpdateOrganizationGroupRequest $request, Organization $organization, OrganizationGroup $organizationGroup)
     {
-        $this->authorize('update', $organization);
-
-        $validated = $request->validate([
-            'name' => [
-                'required',
-                'string',
-                'max:255',
-                Rule::unique('organization_groups')->where(function ($query) use ($organization) {
-                    return $query->where('organization_id', $organization->id);
-                })->ignore($organizationGroup->id),
-            ],
-            'description' => 'nullable|string|max:1000',
-            'is_active' => 'boolean',
-        ]);
-
-        $validated['is_active'] = $request->has('is_active');
-
+        $validated = $request->validated();
+        
         $organizationGroup->update($validated);
 
         return redirect()
@@ -139,19 +106,13 @@ class OrganizationGroupController extends Controller
         return redirect()
             ->route('organizations.groups.index', $organization)
             ->with('success', 'Organization group deleted successfully.');
-    }
-
-    /**
+    }    /**
      * Add a user to the group.
      */
-    public function addUser(Request $request, Organization $organization, OrganizationGroup $organizationGroup)
+    public function addUser(AddUserRequest $request, Organization $organization, OrganizationGroup $organizationGroup)
     {
-        $this->authorize('update', $organization);
-
-        $validated = $request->validate([
-            'user_id' => 'required|exists:users,id',
-        ]);
-
+        $validated = $request->validated();
+        
         $user = User::findOrFail($validated['user_id']);
 
         // Ensure user is member of the organization

@@ -3,13 +3,14 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
+use App\Http\Requests\User\StoreUserRequest;
+use App\Http\Requests\User\UpdateUserRequest;
 use App\Models\User;
 use App\Models\Organization;
 use App\Models\OrganizationGroup;
 use App\Models\UserAuthMethod;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
-use Illuminate\Validation\Rule;
 use Spatie\Permission\Models\Role;
 
 class UserManagementController extends Controller
@@ -90,22 +91,10 @@ class UserManagementController extends Controller
     /**
      * Store a newly created user in storage.
      */
-    public function store(Request $request)
+    public function store(StoreUserRequest $request)
     {
-        $validated = $request->validate([
-            'name' => 'required|string|max:255',
-            'email' => 'required|string|email|max:255|unique:users',
-            'phone' => 'nullable|string|max:20|unique:users',
-            'password' => 'required|string|min:8|confirmed',
-            'primary_auth_method' => 'required|in:email_password,phone_password,email_otp,phone_otp',
-            'roles' => 'array',
-            'roles.*' => 'exists:roles,id',
-            'organizations' => 'array',
-            'organizations.*' => 'exists:organizations,id',
-            'organization_groups' => 'array',
-            'organization_groups.*' => 'exists:organization_groups,id',
-        ]);
-
+        $validated = $request->validated();
+        
         // Create user
         $user = User::create([
             'name' => $validated['name'],
@@ -186,22 +175,10 @@ class UserManagementController extends Controller
     /**
      * Update the specified user in storage.
      */
-    public function update(Request $request, User $user)
+    public function update(UpdateUserRequest $request, User $user)
     {
-        $validated = $request->validate([
-            'name' => 'required|string|max:255',
-            'email' => ['required', 'string', 'email', 'max:255', Rule::unique('users')->ignore($user->id)],
-            'phone' => ['nullable', 'string', 'max:20', Rule::unique('users')->ignore($user->id)],
-            'password' => 'nullable|string|min:8|confirmed',
-            'primary_auth_method' => 'required|in:email_password,phone_password,email_otp,phone_otp',
-            'roles' => 'array',
-            'roles.*' => 'exists:roles,id',
-            'organizations' => 'array',
-            'organizations.*' => 'exists:organizations,id',
-            'organization_groups' => 'array',
-            'organization_groups.*' => 'exists:organization_groups,id',
-        ]);
-
+        $validated = $request->validated();
+        
         // Update user basic info
         $updateData = [
             'name' => $validated['name'],

@@ -3,6 +3,10 @@
 namespace App\Http\Controllers\Auth;
 
 use App\Http\Controllers\Controller;
+use App\Http\Requests\Auth\RegisterRequest;
+use App\Http\Requests\Auth\MultiAuthLoginRequest;
+use App\Http\Requests\Auth\VerifyOtpRequest;
+use App\Http\Requests\Auth\AddAuthMethodRequest;
 use App\Services\AuthService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -25,51 +29,21 @@ class MultiAuthController extends Controller
         return view('auth.register');
     }    /**
      * Handle registration
-     */    public function register(Request $request)
+     */    public function register(RegisterRequest $request)
     {
-        // Build validation rules dynamically based on auth method
-        $rules = [
-            'name' => 'required|string|max:255',
-            'auth_method_type' => 'required|in:email_password,email_otp,phone_password,phone_otp,google_sso',
-        ];
-
-        $authMethod = $request->auth_method_type;
-
-        // Add email validation only for email-based methods
-        if (in_array($authMethod, ['email_password', 'email_otp', 'google_sso'])) {
-            $rules['email'] = 'required|email|unique:users';
-        }
-
-        // Add phone validation only for phone-based methods
-        if (in_array($authMethod, ['phone_password', 'phone_otp'])) {
-            $rules['phone'] = 'required|unique:users';
-        }
-
-        // Add password validation only for password-based methods
-        if (in_array($authMethod, ['email_password', 'phone_password'])) {
-            $rules['password'] = 'required|min:8|confirmed';
-        }
-
-        $validator = Validator::make($request->all(), $rules);
-
-        if ($validator->fails()) {
-            return back()->withErrors($validator)->withInput();
-        }
-
+        $validated = $request->validated();
+        
         try {
-            $data = $request->all();
-            $data['identifier'] = $data['email'] ?? $data['phone'];
-            
-            $result = $this->authService->register($data);
+            $result = $this->authService->register($validated);
               // Send verification if needed
-            if (in_array($data['auth_method_type'], ['email_otp', 'phone_otp'])) {
-                $type = str_contains($data['auth_method_type'], 'email') ? 'email' : 'phone';
-                $otpResult = $this->authService->sendOTP($data['identifier'], $type);
+            if (in_array($validated['auth_method_type'], ['email_otp', 'phone_otp'])) {
+                $type = str_contains($validated['auth_method_type'], 'email') ? 'email' : 'phone';
+                $otpResult = $this->authService->sendOTP($validated['identifier'], $type);
                 
                 if ($otpResult['success']) {
                     return redirect()->route('auth.verify-otp')
                         ->with('message', $otpResult['message'])
-                        ->with('identifier', $data['identifier'])
+                        ->with('identifier', $validated['identifier'])
                         ->with('type', $type);
                 } else {
                     return back()->withErrors(['error' => 'Registration successful but failed to send OTP: ' . $otpResult['message']])->withInput();
@@ -178,29 +152,21 @@ class MultiAuthController extends Controller
     }    /**
      * Verify OTP
      */
-    public function verifyOtp(Request $request)
+    public function verifyOtp(VerifyOtpRequest $request)
     {
-        $validator = Validator::make($request->all(), [
-            'identifier' => 'required',
-            'otp' => 'required',
-            'type' => 'required|in:email,phone',
-        ]);
-
-        if ($validator->fails()) {
-            return back()->withErrors($validator)->withInput();
-        }
+        $validated = $request->validated();
         
         try {
             \Log::info('OTP verification attempt', [
-                'identifier' => $request->identifier,
-                'type' => $request->type,
-                'otp' => $request->otp
+                'identifier' => $validated['identifier'],
+                'type' => $validated['type'],
+                'otp' => $validated['otp']
             ]);
             
             $user = $this->authService->authenticate([
-                'auth_type' => $request->type . '_otp',
-                'identifier' => $request->identifier,
-                'otp' => $request->otp,
+                'auth_type' => $validated['type'] . '_otp',
+                'identifier' => $validated['identifier'],
+                'otp' => $validated['otp'],
             ]);
 
             if ($user) {
@@ -246,13 +212,27 @@ class MultiAuthController extends Controller
      */
     public function addAuthMethod(Request $request)
     {
+        \Log::info('Add auth method request', [
+            'data' => $request->all(),
+            'user' => Auth::id()
+        ]);
+
         $validator = Validator::make($request->all(), [
             'auth_method_type' => 'required|in:email_password,email_otp,phone_password,phone_otp,google_sso',
-            'identifier' => 'required',
+            'identifier' => 'required_unless:auth_method_type,google_sso',
             'password' => 'required_if:auth_method_type,email_password,phone_password|min:8',
+        ], [
+            'auth_method_type.required' => 'Please select an authentication method.',
+            'identifier.required_unless' => 'Please enter your email or phone number.',
+            'password.required_if' => 'Password is required for password-based methods.',
+            'password.min' => 'Password must be at least 8 characters long.',
         ]);
 
         if ($validator->fails()) {
+            \Log::warning('Add auth method validation failed', [
+                'errors' => $validator->errors()->toArray(),
+                'data' => $request->all()
+            ]);
             return response()->json(['errors' => $validator->errors()], 422);
         }
 
@@ -260,11 +240,22 @@ class MultiAuthController extends Controller
             $user = Auth::user();
             $authMethod = $this->authService->addAuthMethod($user, $request->all());
 
+            \Log::info('Auth method added successfully', [
+                'user_id' => $user->id,
+                'auth_method_id' => $authMethod->id,
+                'auth_method_type' => $authMethod->auth_method_type
+            ]);
+
             return response()->json([
-                'message' => 'Auth method added successfully', 
+                'message' => 'Authentication method added successfully', 
                 'auth_method' => $authMethod,
                 'user_updated' => $user->fresh() // Return updated user data
             ]);        } catch (\Exception $e) {
+            \Log::error('Failed to add auth method', [
+                'user_id' => Auth::id(),
+                'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString()
+            ]);
             return response()->json(['error' => $e->getMessage()], 400);
         }
     }
@@ -518,6 +509,8 @@ class MultiAuthController extends Controller
     {
         $validator = Validator::make($request->all(), [
             'name' => 'required|string|max:255',
+            'email' => 'nullable|email|unique:users,email,' . Auth::id(),
+            'phone' => 'nullable|string|unique:users,phone,' . Auth::id(),
             'primary_auth_method' => 'required|string',
         ]);
 
@@ -540,12 +533,32 @@ class MultiAuthController extends Controller
                 return back()->withErrors(['primary_auth_method' => 'Authentication method must be verified before setting as primary'])->withInput();
             }
 
-            $user->update([
+            // Prepare update data
+            $updateData = [
                 'name' => $request->name,
                 'primary_auth_method' => $request->primary_auth_method,
-            ]);
+            ];
 
-            return back()->with('success', 'Profile updated successfully');
+            // Add email if provided
+            if ($request->filled('email') && $request->email !== $user->email) {
+                $updateData['email'] = $request->email;
+                $updateData['email_verified_at'] = null; // Reset verification status
+            }
+
+            // Add phone if provided
+            if ($request->filled('phone') && $request->phone !== $user->phone) {
+                $updateData['phone'] = $request->phone;
+                $updateData['phone_verified_at'] = null; // Reset verification status
+            }
+
+            $user->update($updateData);
+
+            $message = 'Profile updated successfully';
+            if (isset($updateData['email']) || isset($updateData['phone'])) {
+                $message .= '. Please verify your new contact information.';
+            }
+
+            return back()->with('success', $message);
 
         } catch (\Exception $e) {
             return back()->withErrors(['error' => 'Failed to update profile: ' . $e->getMessage()])->withInput();

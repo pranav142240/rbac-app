@@ -19,22 +19,41 @@ class ProfileController extends Controller
         return view('profile.edit', [
             'user' => $request->user(),
         ]);
-    }
-
-    /**
+    }    /**
      * Update the user's profile information.
      */
     public function update(ProfileUpdateRequest $request): RedirectResponse
     {
-        $request->user()->fill($request->validated());
+        $user = $request->user();
+        $oldEmail = $user->email;
+        $oldPhone = $user->phone;
+        
+        $user->fill($request->validated());
 
-        if ($request->user()->isDirty('email')) {
-            $request->user()->email_verified_at = null;
+        // If email changed, reset email verification
+        if ($user->isDirty('email')) {
+            $user->email_verified_at = null;
+        }
+        
+        // If phone changed, reset phone verification
+        if ($user->isDirty('phone')) {
+            $user->phone_verified_at = null;
         }
 
-        $request->user()->save();
+        $user->save();
 
-        return Redirect::route('profile.edit')->with('status', 'profile-updated');
+        $message = 'Profile updated successfully.';
+        
+        // Add verification notices
+        if ($oldEmail !== $user->email) {
+            $message .= ' Please verify your new email address.';
+        }
+        
+        if ($oldPhone !== $user->phone && $user->phone) {
+            $message .= ' Please verify your new phone number.';
+        }
+
+        return Redirect::route('profile.edit')->with('status', 'profile-updated')->with('message', $message);
     }
 
     /**

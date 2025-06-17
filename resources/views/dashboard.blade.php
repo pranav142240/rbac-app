@@ -113,6 +113,7 @@
     <!-- Organizations & Groups Section -->
     <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
         <!-- User Organizations -->
+        @can('viewAny', App\Models\Organization::class)
         <div class="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 overflow-hidden">
             <div class="p-6">
                 <div class="flex items-center justify-between mb-4">
@@ -155,10 +156,12 @@
                     
                     @if(Auth::user()->organizations->count() > 3)
                         <div class="mt-4 pt-4 border-t border-gray-200 dark:border-gray-700">
+                            @can('view_organizations')
                             <a href="{{ route('organizations.index') }}" class="inline-flex items-center text-sm text-primary-600 hover:text-primary-800 dark:text-primary-400 dark:hover:text-primary-300">
                                 <x-icon name="collection" class="h-4 w-4 mr-1" />
                                 {{ __('View All') }} ({{ Auth::user()->organizations->count() }})
                             </a>
+                            @endcan
                         </div>
                     @endif
                 @else
@@ -174,8 +177,10 @@
                 @endif
             </div>
         </div>
+        @endcan
 
         <!-- User Groups -->
+        @can('view_organization_groups')
         <div class="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 overflow-hidden">
             <div class="p-6">                <div class="flex items-center justify-between mb-4">
                     <h2 class="text-lg font-medium text-gray-800 dark:text-gray-200">{{ __('My Groups') }}</h2>
@@ -225,6 +230,7 @@
                 @endif
             </div>
         </div>
+        @endcan
     </div>
 
     <!-- Authentication Methods Section -->

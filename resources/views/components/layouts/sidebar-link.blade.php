@@ -5,7 +5,7 @@
         'bg-sidebar-accent text-sidebar-accent-foreground font-medium' => $active,
         'hover:bg-sidebar-accent hover:text-sidebar-accent-foreground text-sidebar-foreground' => !$active,
     ])>
-        <x-icon name="{{ $icon }}" class="{{ $active ? 'w-5 h-5 text-blue-600' : 'w-5 h-5 text-gray-500' }}" />
+        <x-icon name="{{ $icon }}" class="{{ $active ? 'w-5 h-5 text-primary-600 dark:text-primary-400' : 'w-5 h-5 text-gray-500 dark:text-gray-400' }}" />
         <span :class="{ 'hidden ml-0': !sidebarOpen, 'ml-3': sidebarOpen }"
             x-transition:enter="transition-opacity duration-300" x-transition:enter-start="opacity-0"
             x-transition:enter-end="opacity-100" x-transition:leave="transition-opacity duration-300"
