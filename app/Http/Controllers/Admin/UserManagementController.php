@@ -68,12 +68,29 @@ class UserManagementController extends Controller
             }
         }
 
-        $users = $query->paginate(15)->withQueryString();
+        $users = $query->paginate(15)->withQueryString(); // Changed back to paginate for pagination
+
+        // Calculate enhanced statistics from all users (not just current page)
+        $allUsers = User::with(['roles', 'organizations', 'organizationGroups'])->get();
+        $totalUsers = $allUsers->count();
+        $verifiedUsers = $allUsers->whereNotNull('email_verified_at')->count();
+        $unverifiedUsers = $allUsers->whereNull('email_verified_at')->count();
+        $phoneVerifiedUsers = $allUsers->whereNotNull('phone_verified_at')->count();
+        $recentUsers = $allUsers->where('created_at', '>=', now()->subDays(30))->count();
 
         $roles = Role::all();
         $organizations = Organization::all();
 
-        return view('admin.users.index', compact('users', 'roles', 'organizations'));
+        return view('admin.users.index', compact(
+            'users', 
+            'roles', 
+            'organizations',
+            'totalUsers',
+            'verifiedUsers',
+            'unverifiedUsers',
+            'phoneVerifiedUsers',
+            'recentUsers'
+        ));
     }
 
     /**
@@ -123,6 +140,12 @@ class UserManagementController extends Controller
         if (!empty($validated['roles'])) {
             $roles = Role::whereIn('id', $validated['roles'])->get();
             $user->assignRole($roles);
+        } else {
+            // Assign default "Application User" role if no roles specified
+            $applicationUserRole = Role::where('name', 'Application User')->first();
+            if ($applicationUserRole) {
+                $user->assignRole($applicationUserRole);
+            }
         }
 
         // Add to organizations

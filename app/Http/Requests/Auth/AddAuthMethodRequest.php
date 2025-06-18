@@ -18,20 +18,25 @@ class AddAuthMethodRequest extends FormRequest
      * Get the validation rules that apply to the request.
      *
      * @return array<string, \Illuminate\Contracts\Validation\ValidationRule|array<mixed>|string>
-     */
-    public function rules(): array
+     */    public function rules(): array
     {
-        return [
+        $rules = [
             'auth_method_type' => 'required|in:email_password,email_otp,phone_password,phone_otp,google_sso',
             'identifier' => 'required_unless:auth_method_type,google_sso',
             'password' => 'required_if:auth_method_type,email_password,phone_password|min:8',
         ];
+
+        // Only require OTP for OTP-based methods
+        if ($this->auth_method_type === 'email_otp' || $this->auth_method_type === 'phone_otp') {
+            $rules['otp'] = 'required|string|size:6';
+        }
+
+        return $rules;
     }
 
     /**
      * Get custom messages for validator errors.
-     */
-    public function messages(): array
+     */    public function messages(): array
     {
         return [
             'auth_method_type.required' => 'Please select an authentication method.',
@@ -39,6 +44,8 @@ class AddAuthMethodRequest extends FormRequest
             'identifier.required_unless' => 'Please enter your email or phone number.',
             'password.required_if' => 'Password is required for password-based authentication methods.',
             'password.min' => 'Password must be at least 8 characters long.',
+            'otp.required' => 'OTP is required for OTP-based authentication methods.',
+            'otp.size' => 'OTP must be exactly 6 digits.',
         ];
     }
 }

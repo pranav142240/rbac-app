@@ -13,8 +13,11 @@
             <div class="ml-4 font-semibold text-xl text-primary-600 dark:text-primary-400">{{ config('app.name') }}</div>
         </div>
 
-        <!-- Right side: Search, notifications, profile -->
+        <!-- Right side: Theme toggle, notifications, profile -->
         <div class="flex items-center space-x-4">
+            <!-- Theme Toggle -->
+            <x-theme-toggle size="md" />
+            
             <!-- Profile -->
             <div x-data="{ open: false }" class="relative">
                 <button @click="open = !open" class="flex items-center focus:outline-none">

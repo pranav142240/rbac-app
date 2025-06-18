@@ -15,13 +15,21 @@ class OrgController extends Controller
 {    /**
      * Display a listing of organizations.
      */
-    public function index()
+    public function index(Request $request)
     {
-        $organizations = Organization::active()
-                                   ->accessibleByUser(Auth::user())
+        $organizations = Organization::accessibleByUser(Auth::user())
                                    ->with(['users'])
                                    ->withCount(['users', 'organizationGroups'])
-                                   ->paginate(15);
+                                   ->when($request->search, function ($query, $search) {
+                                       return $query->where('name', 'like', "%{$search}%")
+                                                  ->orWhere('description', 'like', "%{$search}%");
+                                   })
+                                   ->when($request->status, function ($query, $status) {
+                                       return $query->where('is_active', $status === 'active');
+                                   })
+                                   ->latest()
+                                   ->paginate(15)
+                                   ->withQueryString();
 
         return view('organizations.index', compact('organizations'));
     }
@@ -174,5 +182,22 @@ class OrgController extends Controller
         $organization->removeMember($user);
 
         return back()->with('success', 'User removed from organization successfully.');
+    }
+
+    /**
+     * Toggle organization status (active/inactive).
+     */
+    public function toggleStatus(Organization $organization)
+    {
+        $this->authorize('update', $organization);
+
+        $organization->update([
+            'is_active' => !$organization->is_active
+        ]);
+
+        $status = $organization->is_active ? 'activated' : 'deactivated';
+
+        return redirect()->back()
+            ->with('success', "Organization {$status} successfully.");
     }
 }

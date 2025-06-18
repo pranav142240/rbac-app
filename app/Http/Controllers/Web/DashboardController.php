@@ -37,11 +37,9 @@ class DashboardController extends Controller
             'new_users_this_month' => User::whereMonth('created_at', Carbon::now()->month)->count(),
             'active_users_this_week' => User::where('updated_at', '>=', Carbon::now()->subWeek())->count(),
             'total_organizations' => \App\Models\Organization::count(),
-        ];
-
-        // Recent activity for admin
+        ];        // Recent activity for admin
         $recentUsers = User::latest()
-            ->limit(10)
+            ->limit(5)
             ->get();
 
         // System activity

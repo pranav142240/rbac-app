@@ -9,6 +9,7 @@ use App\Models\UserAuthMethod;
 use App\Models\Organization;
 use App\Models\OrganizationGroup;
 use Illuminate\Support\Facades\Hash;
+use Spatie\Permission\Models\Role;
 
 class TestUsersSeeder extends Seeder
 {
@@ -106,10 +107,14 @@ class TestUsersSeeder extends Seeder
                 'identifier' => $userData['phone'],
                 'auth_method_verified_at' => now(),
                 'is_active' => true,
-            ]);
-
-            // Add user to organization
+            ]);            // Add user to organization
             $walkwelTech->addMember($user);
+
+            // Assign default "Application User" role
+            $applicationUserRole = Role::where('name', 'Application User')->first();
+            if ($applicationUserRole) {
+                $user->assignRole($applicationUserRole);
+            }
 
             // Add user to specified groups
             foreach ($userData['groups'] as $groupSlug) {

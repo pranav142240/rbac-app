@@ -5,6 +5,7 @@ namespace Database\Factories;
 use Illuminate\Database\Eloquent\Factories\Factory;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Str;
+use Spatie\Permission\Models\Role;
 
 /**
  * @extends \Illuminate\Database\Eloquent\Factories\Factory<\App\Models\User>
@@ -78,5 +79,21 @@ class UserFactory extends Factory
         return $this->state(fn (array $attributes) => [
             'primary_auth_method' => fake()->randomElement(['email_otp', 'phone_otp']),
         ]);
+    }
+
+    /**
+     * Configure the model factory to assign default role after creation
+     */
+    public function configure()
+    {
+        return $this->afterCreating(function (\App\Models\User $user) {
+            // Assign default "Application User" role if user has no roles
+            if ($user->roles()->count() === 0) {
+                $applicationUserRole = Role::where('name', 'Application User')->first();
+                if ($applicationUserRole) {
+                    $user->assignRole($applicationUserRole);
+                }
+            }
+        });
     }
 }

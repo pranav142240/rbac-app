@@ -250,7 +250,68 @@ class AuthService
             $otp->delete(); // Clean up if sending failed
             return ['success' => false, 'message' => 'Failed to send OTP. Please try again.'];
         }        return ['success' => true, 'message' => 'OTP sent successfully to your ' . $type];
-    }    /**
+    }
+
+    /**
+     * Send OTP for authentication method addition (allows sending even if method doesn't exist)
+     */
+    public function sendOTPForAuthMethodAddition($identifier, $type, $user)
+    {
+        \Log::info("OTP for auth method addition request", [
+            'identifier' => $identifier,
+            'type' => $type,
+            'user_id' => $user->id
+        ]);
+
+        // Validate identifier format
+        if ($type === 'email' && !filter_var($identifier, FILTER_VALIDATE_EMAIL)) {
+            return ['success' => false, 'message' => 'Invalid email format'];
+        }
+        
+        if ($type === 'phone' && !preg_match('/^\+?[1-9]\d{1,14}$/', $identifier)) {
+            return ['success' => false, 'message' => 'Invalid phone format'];
+        }
+
+        // Invalidate previous OTPs for this identifier and user
+        $user->otps()
+            ->where('identifier', $identifier)
+            ->where('type', $type . '_otp')
+            ->whereNull('verified_at')
+            ->delete();
+
+        // Generate new OTP
+        $otpCode = Otp::generateCode();
+        
+        $otp = Otp::create([
+            'user_id' => $user->id,
+            'identifier' => $identifier,
+            'otp_code' => $otpCode,
+            'type' => $type . '_otp',
+            'expires_at' => now()->addMinutes(10),
+        ]);
+
+        \Log::info("OTP generated for auth method addition", [
+            'otp_id' => $otp->id,
+            'user_id' => $user->id,
+            'identifier' => $identifier,
+            'type' => $type
+        ]);
+
+        // Send OTP via email or SMS
+        $sent = false;
+        if ($type === 'email') {
+            $sent = $this->sendOTPEmail($identifier, $otpCode);
+        } else {
+            $sent = $this->sendOTPSMS($identifier, $otpCode);
+        }
+
+        if (!$sent) {
+            $otp->delete(); // Clean up if sending failed
+            return ['success' => false, 'message' => 'Failed to send OTP. Please try again.'];
+        }        return ['success' => true, 'message' => 'OTP sent successfully to your ' . $type . ' for authentication method verification'];
+    }
+
+    /**
      * Send Magic Link for passwordless authentication
      */
     public function sendMagicLink($email)
@@ -398,31 +459,43 @@ class AuthService
 
         // Create the auth method record
         return $this->createAuthMethod($user, $data);
-    }
-
-    /**
+    }    /**
      * Update user's main fields when adding new auth methods
      */
     private function updateUserMainFields(User $user, array $data)
     {
         $updateFields = [];
 
-        // If adding phone-based auth method and user doesn't have phone
+        // If adding phone-based auth method
         if (in_array($data['auth_method_type'], ['phone_password', 'phone_otp'])) {
-            if (empty($user->phone) && !empty($data['identifier'])) {
+            if (!empty($data['identifier'])) {
                 // Validate phone format
                 if (preg_match('/^\+?[1-9]\d{1,14}$/', $data['identifier'])) {
-                    $updateFields['phone'] = $data['identifier'];
+                    // Only update if user doesn't have phone OR has different phone
+                    if (empty($user->phone)) {
+                        $updateFields['phone'] = $data['identifier'];
+                    } elseif ($user->phone !== $data['identifier']) {
+                        // User is trying to add auth method for different phone number
+                        throw new \Exception('You can only add authentication methods for your registered phone number: ' . $user->phone);
+                    }
+                    // If user->phone === data['identifier'], no update needed
                 }
             }
         }
 
-        // If adding email-based auth method and user doesn't have email
+        // If adding email-based auth method
         if (in_array($data['auth_method_type'], ['email_password', 'email_otp'])) {
-            if (empty($user->email) && !empty($data['identifier'])) {
+            if (!empty($data['identifier'])) {
                 // Validate email format
                 if (filter_var($data['identifier'], FILTER_VALIDATE_EMAIL)) {
-                    $updateFields['email'] = $data['identifier'];
+                    // Only update if user doesn't have email OR has different email
+                    if (empty($user->email)) {
+                        $updateFields['email'] = $data['identifier'];
+                    } elseif ($user->email !== $data['identifier']) {
+                        // User is trying to add auth method for different email
+                        throw new \Exception('You can only add authentication methods for your registered email address: ' . $user->email);
+                    }
+                    // If user->email === data['identifier'], no update needed
                 }
             }
         }

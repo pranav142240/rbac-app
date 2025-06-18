@@ -96,8 +96,14 @@
                 <div class="p-6">
                     <div class="flex justify-between items-center mb-4">
                         <h3 class="text-lg font-medium text-gray-900 dark:text-gray-100">Authentication Methods</h3>
-                        <button type="button" onclick="openAddMethodModal()" class="bg-primary-600 hover:bg-primary-700 dark:bg-primary-500 dark:hover:bg-primary-600 text-white px-4 py-2 rounded-md text-sm transition-colors duration-200">
-                            Add Method
+                        
+                        @if($hasAvailableMethods)
+                            <button type="button" onclick="openAddMethodModal()" class="bg-primary-600 hover:bg-primary-700 dark:bg-primary-500 dark:hover:bg-primary-600 text-white px-4 py-2 rounded-md text-sm transition-colors duration-200">
+                                Add Method
+                            </button>
+                        @else
+                            <span class="text-sm text-gray-500 dark:text-gray-400">All methods added</span>
+                        @endif
                         </button>
                     </div>
 
@@ -285,14 +291,37 @@
                         <div class="space-y-4">
                             <div>
                                 <x-input-label for="new_auth_method_type" :value="__('Method Type')" />
-                                <select id="new_auth_method_type" name="auth_method_type" class="form-input" required>
-                                    <option value="">Select method</option>
-                                    <option value="email_password">Email + Password</option>
-                                    <option value="email_otp">Email + OTP</option>
-                                    <option value="phone_password">Phone + Password</option>
-                                    <option value="phone_otp">Phone + OTP</option>
-                                    <option value="google_sso">Google SSO</option>
-                                </select>
+                                
+                                @if($hasAvailableMethods)
+                                    <select id="new_auth_method_type" name="auth_method_type" class="form-input" required>
+                                        <option value="">Select method</option>
+                                        @foreach($availableAuthMethods as $value => $label)
+                                            <option value="{{ $value }}">{{ $label }}</option>
+                                        @endforeach
+                                    </select>
+                                @else
+                                    <div class="p-4 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg">
+                                        <div class="flex">
+                                            <div class="flex-shrink-0">
+                                                <svg class="h-5 w-5 text-blue-400" viewBox="0 0 20 20" fill="currentColor">
+                                                    <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd" />
+                                                </svg>
+                                            </div>
+                                            <div class="ml-3">
+                                                <h3 class="text-sm font-medium text-blue-800 dark:text-blue-200">
+                                                    All Authentication Methods Added
+                                                </h3>
+                                                <div class="mt-2 text-sm text-blue-700 dark:text-blue-300">
+                                                    <p>You have already added all available authentication methods to your account. You can manage your existing methods below.</p>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <!-- Hidden select for JavaScript compatibility -->
+                                    <select id="new_auth_method_type" name="auth_method_type" class="hidden" disabled>
+                                        <option value="">No methods available</option>
+                                    </select>
+                                @endif
                             </div>
 
                             <div id="new_identifier_section" class="hidden">
@@ -310,13 +339,38 @@
                                              class="mt-1 block w-full" 
                                              minlength="8" />
                             </div>
+
+                            <!-- OTP Section for OTP-based methods -->
+                            <div id="new_otp_section" class="hidden">
+                                <div class="flex gap-2">
+                                    <div class="flex-1">
+                                        <x-input-label for="new_otp" :value="__('OTP Code')" />
+                                        <x-text-input id="new_otp" name="otp" type="text" 
+                                                     placeholder="Enter 6-digit OTP code"
+                                                     class="mt-1 block w-full" 
+                                                     maxlength="6" />
+                                    </div>
+                                    <div class="flex items-end">
+                                        <button type="button" id="send_auth_otp_btn" class="px-4 py-2 bg-primary-600 hover:bg-primary-700 text-white rounded-md text-sm transition-colors duration-200">
+                                            Send OTP
+                                        </button>
+                                    </div>
+                                </div>
+                                <div id="otp_message_container"></div>
+                            </div>
                         </div>
                     </div>
                     
                     <div class="px-4 py-3 sm:px-6 sm:flex sm:flex-row-reverse">
-                        <x-primary-button type="submit" class="sm:ml-3">
-                            Add Method
-                        </x-primary-button>
+                        @if($hasAvailableMethods)
+                            <x-primary-button type="submit" class="sm:ml-3">
+                                Add Method
+                            </x-primary-button>
+                        @else
+                            <button type="button" disabled class="sm:ml-3 bg-gray-300 dark:bg-gray-600 text-gray-500 dark:text-gray-400 px-4 py-2 rounded-md text-sm cursor-not-allowed">
+                                No Methods Available
+                            </button>
+                        @endif
                         <button type="button" onclick="closeAddMethodModal()" class="mt-3 w-full inline-flex justify-center rounded-md border border-gray-300 dark:border-gray-600 shadow-sm px-4 py-2 bg-white dark:bg-gray-700 text-base font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-600 focus:outline-none sm:mt-0 sm:ml-3 sm:w-auto sm:text-sm">
                             Cancel
                         </button>
@@ -369,6 +423,15 @@
 
     <script>
         function openAddMethodModal() {
+            // Check if there are any available methods
+            const methodSelect = document.getElementById('new_auth_method_type');
+            const hasOptions = methodSelect && methodSelect.options.length > 1; // More than just the default option
+            
+            if (!hasOptions || methodSelect.disabled) {
+                alert('All available authentication methods have already been added to your account.');
+                return;
+            }
+            
             document.getElementById('addMethodModal').classList.remove('hidden');
         }
 
@@ -392,14 +455,35 @@
         document.getElementById('addMethodForm').addEventListener('submit', function(e) {
             e.preventDefault();
             
-            // Get form data
-            const formData = new FormData(this);
-            const methodType = formData.get('auth_method_type');
+            // Get method type first
+            const methodType = document.getElementById('new_auth_method_type').value;
+            
+            // Manually construct FormData to exclude irrelevant fields
+            const formData = new FormData();
+            formData.append('auth_method_type', methodType);
+            
+            if (methodType !== 'google_sso') {
+                const identifier = document.getElementById('new_identifier').value;
+                formData.append('identifier', identifier);
+                
+                // Only include password for password-based methods
+                if (methodType.includes('password')) {
+                    const password = document.getElementById('new_password').value;
+                    formData.append('password', password);
+                }
+                
+                // Only include OTP for OTP-based methods
+                if (methodType.includes('otp')) {
+                    const otp = document.getElementById('new_otp').value;
+                    formData.append('otp', otp);
+                }
+            }
             
             console.log('Form submission started', {
                 methodType: methodType,
                 identifier: formData.get('identifier'),
-                hasPassword: !!formData.get('password')
+                hasPassword: !!formData.get('password'),
+                hasOtp: !!formData.get('otp')
             });
             
             // Validate required fields
@@ -426,6 +510,18 @@
                         return;
                     }
                 }
+                
+                if (methodType === 'email_otp' || methodType === 'phone_otp') {
+                    const otp = formData.get('otp');
+                    if (!otp || otp.trim() === '') {
+                        alert('Please enter the OTP code');
+                        return;
+                    }
+                    if (otp.length !== 6) {
+                        alert('OTP must be exactly 6 digits');
+                        return;
+                    }
+                }
             }
             
             // Handle Google SSO differently
@@ -441,7 +537,7 @@
             submitButton.disabled = true;
             submitButton.textContent = 'Adding...';
             
-            // Check if CSRF token exists
+            // Check if CSRF token exists and add it to FormData
             const csrfToken = document.querySelector('meta[name="csrf-token"]');
             if (!csrfToken) {
                 console.error('CSRF token not found');
@@ -451,13 +547,14 @@
                 return;
             }
             
+            formData.append('_token', csrfToken.getAttribute('content'));
+            
             console.log('Making fetch request to:', '{{ route("auth.add-method") }}');
             
             fetch('{{ route("auth.add-method") }}', {
                 method: 'POST',
                 body: formData,
                 headers: {
-                    'X-CSRF-TOKEN': csrfToken.getAttribute('content'),
                     'Accept': 'application/json'
                 }
             })
@@ -505,40 +602,174 @@
             });
         });
 
+        // Send OTP for authentication method addition
+        document.getElementById('send_auth_otp_btn').addEventListener('click', function() {
+            const methodType = document.getElementById('new_auth_method_type').value;
+            const identifier = document.getElementById('new_identifier').value;
+            
+            if (!methodType || !methodType.includes('otp')) {
+                alert('Please select an OTP method first');
+                return;
+            }
+            
+            if (!identifier) {
+                const type = methodType.includes('email') ? 'email' : 'phone';
+                alert('Please enter your ' + type + ' first');
+                return;
+            }
+
+            this.disabled = true;
+            this.textContent = 'Sending...';
+
+            const type = methodType.includes('email') ? 'email' : 'phone';
+            const csrfToken = document.querySelector('meta[name="csrf-token"]');
+            
+            if (!csrfToken) {
+                console.error('CSRF token not found');
+                this.disabled = false;
+                this.textContent = 'Send OTP';
+                return;
+            }
+
+            fetch('{{ route("auth.send-otp-for-method") }}', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRF-TOKEN': csrfToken.getAttribute('content'),
+                    'Accept': 'application/json'
+                },
+                body: JSON.stringify({
+                    identifier: identifier,
+                    type: type
+                })
+            })
+            .then(response => {
+                console.log('Response status:', response.status);
+                console.log('Response ok:', response.ok);
+                
+                return response.json().then(data => ({
+                    status: response.status,
+                    ok: response.ok,
+                    data: data
+                }));
+            })
+            .then(result => {
+                console.log('Full result:', result);
+                
+                // Clear any existing messages
+                const messageContainer = document.getElementById('otp_message_container');
+                messageContainer.innerHTML = '';
+
+                const messageDiv = document.createElement('div');
+                messageDiv.className = 'mt-2 p-3 rounded text-sm';
+                
+                if (result.ok && result.data.message) {
+                    messageDiv.className += ' bg-green-100 border border-green-400 text-green-700';
+                    messageDiv.textContent = result.data.message;
+                } else if (!result.ok && result.data.error) {
+                    messageDiv.className += ' bg-red-100 border border-red-400 text-red-700';
+                    messageDiv.textContent = result.data.error;
+                } else if (!result.ok && result.data.errors) {
+                    messageDiv.className += ' bg-red-100 border border-red-400 text-red-700';
+                    let errorMsg = 'Validation errors: ';
+                    for (let field in result.data.errors) {
+                        errorMsg += result.data.errors[field].join(', ') + ' ';
+                    }
+                    messageDiv.textContent = errorMsg;
+                } else {
+                    messageDiv.className += ' bg-red-100 border border-red-400 text-red-700';
+                    messageDiv.textContent = 'Failed to send OTP: ' + (result.data.message || 'Unknown error');
+                }
+                
+                messageContainer.appendChild(messageDiv);
+            })
+            .catch(error => {
+                console.error('Network Error details:', error);
+                
+                const messageContainer = document.getElementById('otp_message_container');
+                messageContainer.innerHTML = '';
+                
+                const messageDiv = document.createElement('div');
+                messageDiv.className = 'mt-2 p-3 rounded text-sm bg-red-100 border border-red-400 text-red-700';
+                messageDiv.textContent = 'Network error while sending OTP. Error: ' + error.message;
+                
+                messageContainer.appendChild(messageDiv);
+            })
+            .finally(() => {
+                this.disabled = false;
+                this.textContent = 'Send OTP';
+            });
+        });
+
         // Dynamic form fields based on method type
         document.getElementById('new_auth_method_type').addEventListener('change', function() {
             const methodType = this.value;
             const identifierSection = document.getElementById('new_identifier_section');
             const passwordSection = document.getElementById('new_password_section');
+            const otpSection = document.getElementById('new_otp_section');
             const identifierInput = document.getElementById('new_identifier');
             const passwordInput = document.getElementById('new_password');
+            const otpInput = document.getElementById('new_otp');
             const identifierLabel = identifierSection.querySelector('label');
 
             // Reset sections and remove required attributes
             identifierSection.classList.add('hidden');
             passwordSection.classList.add('hidden');
+            otpSection.classList.add('hidden');
             identifierInput.removeAttribute('required');
             passwordInput.removeAttribute('required');
+            otpInput.removeAttribute('required');
+            
+            // Clear previous values and reset readonly state
+            identifierInput.value = '';
+            identifierInput.readOnly = false;
+            identifierInput.classList.remove('bg-gray-100', 'cursor-not-allowed');
+            passwordInput.value = '';
+            otpInput.value = '';
 
             if (methodType && methodType !== 'google_sso') {
                 identifierSection.classList.remove('hidden');
                 identifierInput.setAttribute('required', 'required');
                 
-                // Update label and input type
+                // Update label and input type based on method
                 if (methodType.includes('email')) {
                     identifierLabel.textContent = 'Email Address';
                     identifierInput.type = 'email';
-                    identifierInput.placeholder = 'Enter email address';
+                    
+                    // Pre-fill user's email if available
+                    @if($user->email)
+                        identifierInput.value = '{{ $user->email }}';
+                        identifierInput.readOnly = true;
+                        identifierInput.classList.add('bg-gray-100', 'cursor-not-allowed');
+                        identifierInput.placeholder = 'Your current email address';
+                    @else
+                        identifierInput.placeholder = 'Enter email address';
+                    @endif
                 } else if (methodType.includes('phone')) {
                     identifierLabel.textContent = 'Phone Number';
                     identifierInput.type = 'tel';
-                    identifierInput.placeholder = 'Enter phone number (e.g., +1234567890)';
+                    
+                    // Pre-fill user's phone if available
+                    @if($user->phone)
+                        identifierInput.value = '{{ $user->phone }}';
+                        identifierInput.readOnly = true;
+                        identifierInput.classList.add('bg-gray-100', 'cursor-not-allowed');
+                        identifierInput.placeholder = 'Your current phone number';
+                    @else
+                        identifierInput.placeholder = 'Enter phone number (e.g., +1234567890)';
+                    @endif
                 }
 
                 // Show password field for password methods
                 if (methodType.includes('password')) {
                     passwordSection.classList.remove('hidden');
                     passwordInput.setAttribute('required', 'required');
+                }
+                
+                // Show OTP field for OTP methods
+                if (methodType.includes('otp')) {
+                    otpSection.classList.remove('hidden');
+                    otpInput.setAttribute('required', 'required');
                 }
             }
         });

@@ -206,39 +206,60 @@ class MultiAuthController extends Controller
         $roles = $user->roles->pluck('name');
         $permissions = $user->getAllPermissions();
 
-        return view('auth.profile', compact('user', 'authMethods', 'roles', 'permissions'));
+        // Calculate available auth methods
+        $allAuthMethods = [
+            'email_password' => 'Email + Password',
+            'email_otp' => 'Email + OTP',
+            'phone_password' => 'Phone + Password',
+            'phone_otp' => 'Phone + OTP',
+            'google_sso' => 'Google SSO'
+        ];
+        
+        $existingMethodTypes = $authMethods->pluck('auth_method_type')->toArray();
+        $availableAuthMethods = array_diff_key($allAuthMethods, array_flip($existingMethodTypes));
+        $hasAvailableMethods = count($availableAuthMethods) > 0;
+
+        return view('auth.profile', compact(
+            'user', 
+            'authMethods', 
+            'roles', 
+            'permissions',
+            'availableAuthMethods',
+            'hasAvailableMethods'
+        ));
     }    /**
      * Add new auth method
      */
-    public function addAuthMethod(Request $request)
+    public function addAuthMethod(AddAuthMethodRequest $request)
     {
         \Log::info('Add auth method request', [
             'data' => $request->all(),
             'user' => Auth::id()
         ]);
 
-        $validator = Validator::make($request->all(), [
-            'auth_method_type' => 'required|in:email_password,email_otp,phone_password,phone_otp,google_sso',
-            'identifier' => 'required_unless:auth_method_type,google_sso',
-            'password' => 'required_if:auth_method_type,email_password,phone_password|min:8',
-        ], [
-            'auth_method_type.required' => 'Please select an authentication method.',
-            'identifier.required_unless' => 'Please enter your email or phone number.',
-            'password.required_if' => 'Password is required for password-based methods.',
-            'password.min' => 'Password must be at least 8 characters long.',
-        ]);
-
-        if ($validator->fails()) {
-            \Log::warning('Add auth method validation failed', [
-                'errors' => $validator->errors()->toArray(),
-                'data' => $request->all()
-            ]);
-            return response()->json(['errors' => $validator->errors()], 422);
-        }
-
         try {
             $user = Auth::user();
-            $authMethod = $this->authService->addAuthMethod($user, $request->all());
+            $validated = $request->validated();
+            
+            // For OTP-based methods, verify the OTP before adding the method
+            if ($validated['auth_method_type'] === 'email_otp' || $validated['auth_method_type'] === 'phone_otp') {
+                $type = str_contains($validated['auth_method_type'], 'email') ? 'email' : 'phone';
+                
+                // Verify the OTP
+                $otpVerified = $this->verifyOTPForAuthMethod($validated['identifier'], $validated['otp'], $type);
+                
+                if (!$otpVerified) {
+                    return response()->json(['error' => 'Invalid or expired OTP code. Please request a new OTP and try again.'], 400);
+                }
+            }
+            
+            $authMethod = $this->authService->addAuthMethod($user, $validated);
+
+            // For OTP-based methods, mark as verified since OTP was verified
+            // For password-based methods, mark as verified immediately since no OTP verification is needed
+            if (in_array($validated['auth_method_type'], ['email_otp', 'phone_otp', 'email_password', 'phone_password'])) {
+                $authMethod->markAsVerified();
+            }
 
             \Log::info('Auth method added successfully', [
                 'user_id' => $user->id,
@@ -250,7 +271,27 @@ class MultiAuthController extends Controller
                 'message' => 'Authentication method added successfully', 
                 'auth_method' => $authMethod,
                 'user_updated' => $user->fresh() // Return updated user data
-            ]);        } catch (\Exception $e) {
+            ]);        } catch (\Illuminate\Database\QueryException $e) {
+            \Log::error('Database error adding auth method', [
+                'user_id' => Auth::id(),
+                'error' => $e->getMessage(),
+                'code' => $e->getCode()
+            ]);
+            
+            // Handle specific database constraint violations
+            if ($e->getCode() === '23000') {
+                if (str_contains($e->getMessage(), 'users_email_unique')) {
+                    return response()->json(['error' => 'This email address is already registered with another account.'], 400);
+                } elseif (str_contains($e->getMessage(), 'users_phone_unique')) {
+                    return response()->json(['error' => 'This phone number is already registered with another account.'], 400);
+                } elseif (str_contains($e->getMessage(), 'user_auth_methods')) {
+                    return response()->json(['error' => 'This authentication method already exists for your account.'], 400);
+                }
+            }
+            
+            return response()->json(['error' => 'Database error occurred. Please try again.'], 500);
+            
+        } catch (\Exception $e) {
             \Log::error('Failed to add auth method', [
                 'user_id' => Auth::id(),
                 'error' => $e->getMessage(),
@@ -562,6 +603,100 @@ class MultiAuthController extends Controller
 
         } catch (\Exception $e) {
             return back()->withErrors(['error' => 'Failed to update profile: ' . $e->getMessage()])->withInput();
+        }
+    }
+
+    /**
+     * Verify OTP for authentication method addition
+     */
+    private function verifyOTPForAuthMethod($identifier, $otpCode, $type)
+    {
+        try {
+            // Find user (should be current user)
+            $user = Auth::user();
+            
+            // Check if OTP exists and is valid
+            $otp = $user->otps()
+                ->where('identifier', $identifier)
+                ->where('type', $type . '_otp')
+                ->where('otp_code', $otpCode)
+                ->valid()
+                ->first();
+
+            if (!$otp) {
+                return false;
+            }
+
+            // Mark OTP as verified
+            $otp->markAsVerified();
+            return true;
+            
+        } catch (\Exception $e) {
+            \Log::error('OTP verification failed', [
+                'identifier' => $identifier,
+                'type' => $type,
+                'error' => $e->getMessage()
+            ]);
+            return false;
+        }
+    }
+
+    /**
+     * Send OTP for adding authentication method (for authenticated users)
+     */
+    public function sendOtpForMethod(Request $request)
+    {
+        try {
+            \Log::info('Send OTP for method request received', [
+                'data' => $request->all(),
+                'user' => Auth::id()
+            ]);
+
+            $validator = Validator::make($request->all(), [
+                'identifier' => 'required',
+                'type' => 'required|in:email,phone',
+            ]);
+
+            if ($validator->fails()) {
+                \Log::warning('Send OTP for method validation failed', $validator->errors()->toArray());
+                return response()->json(['errors' => $validator->errors()], 422);
+            }
+
+            $user = Auth::user();
+            $identifier = $request->identifier;
+            $type = $request->type;
+
+            // For adding auth methods, we allow sending OTP even if the method doesn't exist yet
+            // But we check if the identifier belongs to the current user
+            if ($type === 'email' && $user->email && $user->email !== $identifier) {
+                return response()->json(['error' => 'You can only add authentication methods for your own email address.'], 400);
+            }
+            
+            if ($type === 'phone' && $user->phone && $user->phone !== $identifier) {
+                return response()->json(['error' => 'You can only add authentication methods for your own phone number.'], 400);
+            }
+
+            // Use the specialized method for adding auth methods
+            $result = $this->authService->sendOTPForAuthMethodAddition($identifier, $type, $user);
+
+            \Log::info('AuthService sendOTPForAuthMethodAddition result', $result);
+
+            if ($result['success']) {
+                return response()->json(['message' => $result['message']]);
+            }
+
+            return response()->json(['error' => $result['message']], 400);
+
+        } catch (\Exception $e) {
+            \Log::error('Send OTP for method exception', [
+                'message' => $e->getMessage(),
+                'trace' => $e->getTraceAsString()
+            ]);
+            
+            return response()->json([
+                'error' => 'Internal server error occurred while sending OTP',
+                'debug' => config('app.debug') ? $e->getMessage() : null
+            ], 500);
         }
     }
 }

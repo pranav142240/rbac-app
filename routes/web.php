@@ -2,7 +2,6 @@
 
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\Web\DashboardController;
-use App\Http\Controllers\Web\OrganizationController;
 use App\Http\Controllers\RoleController;
 use App\Http\Controllers\PermissionController;
 use App\Http\Controllers\OrgController;
@@ -82,35 +81,17 @@ Route::middleware(['auth', 'verified'])->group(function () {
         Route::post('organizations', [OrgController::class, 'store'])->name('organizations.store');
         
         // Routes that require organization access
-        Route::middleware('organization.access')->group(function () {
-            Route::get('organizations/{organization}', [OrgController::class, 'show'])->name('organizations.show');
+        Route::middleware('organization.access')->group(function () {            Route::get('organizations/{organization}', [OrgController::class, 'show'])->name('organizations.show');
             Route::get('organizations/{organization}/edit', [OrgController::class, 'edit'])->name('organizations.edit');
             Route::put('organizations/{organization}', [OrgController::class, 'update'])->name('organizations.update');
             Route::delete('organizations/{organization}', [OrgController::class, 'destroy'])->name('organizations.destroy');
+            Route::post('organizations/{organization}/toggle-status', [OrgController::class, 'toggleStatus'])->name('organizations.toggle-status');
             Route::get('organizations/{organization}/members', [OrgController::class, 'members'])->name('organizations.members');
             Route::post('organizations/{organization}/members', [OrgController::class, 'addMember'])->name('organizations.members.add');
-            Route::delete('organizations/{organization}/members/{user}', [OrgController::class, 'removeMember'])->name('organizations.members.remove');
-        });
+            Route::delete('organizations/{organization}/members/{user}', [OrgController::class, 'removeMember'])->name('organizations.members.remove');});
     });
-      // Advanced Organization Management (Web\OrganizationController)
-    Route::prefix('web')->name('web.')->middleware(['permission:view_organizations|manage_organizations'])->group(function () {
-        Route::get('organizations', [OrganizationController::class, 'index'])->name('organizations.index');
-        Route::get('organizations/create', [OrganizationController::class, 'create'])->name('organizations.create');
-        Route::post('organizations', [OrganizationController::class, 'store'])->name('organizations.store');
-        
-        // Routes that require organization access
-        Route::middleware('organization.access')->group(function () {
-            Route::get('organizations/{organization}', [OrganizationController::class, 'show'])->name('organizations.show');
-            Route::get('organizations/{organization}/edit', [OrganizationController::class, 'edit'])->name('organizations.edit');
-            Route::put('organizations/{organization}', [OrganizationController::class, 'update'])->name('organizations.update');
-            Route::delete('organizations/{organization}', [OrganizationController::class, 'destroy'])->name('organizations.destroy');
-            Route::post('organizations/{organization}/toggle-status', [OrganizationController::class, 'toggleStatus'])->name('organizations.toggle-status');
-            Route::get('organizations/{organization}/users', [OrganizationController::class, 'users'])->name('organizations.users');
-            Route::post('organizations/{organization}/assign-user', [OrganizationController::class, 'assignUser'])->name('organizations.assign-user');
-            Route::post('organizations/{organization}/remove-user', [OrganizationController::class, 'removeUser'])->name('organizations.remove-user');
-        });
-    });
-      // Organization Groups Management
+
+    // Organization Groups Management
     Route::middleware('permission:view_organization_groups|manage_organization_groups')->group(function () {
         // Routes that require organization access
         Route::middleware('organization.access')->group(function () {
