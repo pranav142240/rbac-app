@@ -6,7 +6,13 @@
         <!-- Sidebar Menu -->
         <nav class="flex-1 overflow-y-auto custom-scrollbar py-4">            <ul class="space-y-1 px-2">                <!-- Dashboard -->
                 <x-layouts.sidebar-link href="{{ route('dashboard') }}" icon="chart-bar"
-                    :active="request()->routeIs('dashboard')">{{ Auth::user()->hasRole('Admin') ? 'Admin Dashboard' : 'User Dashboard' }}</x-layouts.sidebar-link>                <!-- Auth Profile -->
+                    :active="request()->routeIs('dashboard')">
+                    @can('view_admin_dashboard')
+                        Admin Dashboard
+                    @else
+                        User Dashboard
+                    @endcan
+                </x-layouts.sidebar-link><!-- Auth Profile -->
                 <x-layouts.sidebar-link href="{{ route('auth.profile') }}" icon="user-circle"
                     :active="request()->routeIs('auth.profile*')">Auth Profile</x-layouts.sidebar-link><!-- Roles Management -->
                 @can('view_roles')
@@ -32,15 +38,14 @@
                 @endcan                  <!-- Organizations Management -->
                 @can('viewAny', App\Models\Organization::class)
                 <x-layouts.sidebar-two-level-link-parent title="Organizations" icon="office-building"
-                    :active="request()->routeIs('organizations*')">
-                    @can('view_organizations')
+                    :active="request()->routeIs('organizations*')">                    @can('view_organizations')
                     <x-layouts.sidebar-two-level-link href="{{ route('organizations.index') }}" icon="list"
                         :active="request()->routeIs('organizations.index')">
-                        @if(auth()->user()->hasRole(['Super Admin', 'Admin']))
+                        @can('manage_all_organizations')
                             All Organizations
                         @else
                             My Organizations
-                        @endif
+                        @endcan
                     </x-layouts.sidebar-two-level-link>
                     @endcan
                     

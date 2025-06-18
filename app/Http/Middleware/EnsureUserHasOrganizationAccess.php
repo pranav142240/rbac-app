@@ -13,13 +13,12 @@ class EnsureUserHasOrganizationAccess
      * Handle an incoming request.
      *
      * @param  \Closure(\Illuminate\Http\Request): (\Symfony\Component\HttpFoundation\Response)  $next
-     */
-    public function handle(Request $request, Closure $next): SymfonyResponse
+     */    public function handle(Request $request, Closure $next): SymfonyResponse
     {
         $user = $request->user();
         
-        // Super admins can access all organizations
-        if ($user && $user->hasRole(['Super Admin', 'Admin'])) {
+        // Users with admin permissions can access all organizations
+        if ($user && $user->can('manage_all_organizations')) {
             return $next($request);
         }
 

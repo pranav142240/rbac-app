@@ -49,6 +49,7 @@ class PermissionSeeder extends Seeder
             'update_organizations',
             'delete_organizations',
             'manage_organizations',
+            'manage_all_organizations', // New: Admin-level org management
             'join_organizations',
             'leave_organizations',
             
@@ -60,6 +61,9 @@ class PermissionSeeder extends Seeder
             'manage_organization_groups',
             'join_organization_groups',
             'leave_organization_groups',
+            
+            // Dashboard Permissions
+            'view_admin_dashboard', // New: Admin dashboard access
             
             // Post Management Permissions
             'create_posts',

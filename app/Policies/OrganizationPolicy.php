@@ -14,50 +14,44 @@ class OrganizationPolicy
     {
         // Users can view organizations if they have the proper permission
         return $user->can('view_organizations');
-    }
-
-    /**
+    }    /**
      * Determine whether the user can view the model.
      */
     public function view(User $user, Organization $organization): bool
     {
-        // Super admins and admins can view all organizations
-        if ($user->hasRole(['Super Admin', 'Admin'])) {
+        // Users with admin permissions can view all organizations
+        if ($user->can('manage_all_organizations')) {
             return true;
         }
         
-        // Users can view organizations they belong to
-        return $organization->hasMember($user);
+        // Users can view organizations they belong to if they have view permission
+        return $user->can('view_organizations') && $organization->hasMember($user);
     }    /**
      * Determine whether the user can create models.
      */
     public function create(User $user): bool
     {
-        // Only admins or users with specific permission can create organizations
-        return $user->hasRole(['Super Admin', 'Admin']) || $user->can('create_organizations');
-    }
-
-    /**
+        // Users with create organization permission can create organizations
+        return $user->can('create_organizations');
+    }    /**
      * Determine whether the user can update the model.
      */
     public function update(User $user, Organization $organization): bool
     {
-        // Super admins and admins can update any organization
-        if ($user->hasRole(['Super Admin', 'Admin'])) {
+        // Users with admin permissions can update any organization
+        if ($user->can('manage_all_organizations')) {
             return true;
         }
         
         // Organization members with specific permission can update
         return $organization->hasMember($user) && $user->can('manage_organizations');
-    }
-
-    /**
+    }    /**
      * Determine whether the user can delete the model.
      */
     public function delete(User $user, Organization $organization): bool
     {
-        // Only super admins and admins can delete organizations
-        return $user->hasRole(['Super Admin', 'Admin']);
+        // Only users with delete organization permission can delete organizations
+        return $user->can('delete_organizations');
     }
 
     /**
@@ -65,12 +59,12 @@ class OrganizationPolicy
      */
     public function restore(User $user, Organization $organization): bool
     {
-        return $user->hasRole(['Super Admin', 'Admin']);
+        return $user->can('delete_organizations');
     }    /**
      * Determine whether the user can permanently delete the model.
      */
     public function forceDelete(User $user, Organization $organization): bool
     {
-        return $user->hasRole(['Super Admin', 'Admin']);
+        return $user->can('delete_organizations');
     }
 }

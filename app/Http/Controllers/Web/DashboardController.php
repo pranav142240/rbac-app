@@ -17,14 +17,14 @@ class DashboardController extends Controller
     {
         $user = auth()->user();
         
-        // Check if user is an admin
-        if ($user->hasRole('Admin')) {
+        // Check if user has admin permissions
+        if ($user->can('view_admin_dashboard')) {
             return $this->adminDashboard();
         }
         
         // Regular user dashboard
         return $this->userDashboard();
-    }    /**
+    }/**
      * Display the admin dashboard.
      */
     private function adminDashboard(): View
